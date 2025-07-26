@@ -25,8 +25,73 @@ A real-time marketplace connecting street food vendors with local suppliers thro
 ### Prerequisites
 
 - Node.js 18+
+- npm or yarn
 - Supabase account
-- Socket.IO server (for real-time features)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd NattuMarket
+   ```
+
+2. **Install dependencies**
+   ```bash
+   # Frontend dependencies
+   npm install
+
+   # Backend dependencies
+   cd server
+   npm install
+   cd ..
+   ```
+
+3. **Environment Setup**
+   
+   **Frontend (.env):**
+   ```bash
+   VITE_SUPABASE_URL=your_supabase_project_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_API_URL=http://localhost:5000/api
+   VITE_SOCKET_URL=http://localhost:5000
+   ```
+
+   **Backend (server/.env):**
+   ```bash
+   NODE_ENV=development
+   PORT=5000
+   CLIENT_URL=http://localhost:5173
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+   JWT_SECRET=your_jwt_secret
+   ```
+
+4. **Database Setup (Supabase)**
+   - Create a new Supabase project
+   - Run the SQL schema from `server/database/schema.sql`
+   - Update environment variables with your Supabase credentials
+
+5. **Start Development**
+
+   **Option A: Using batch script (Windows)**
+   ```bash
+   start-dev.bat
+   ```
+
+   **Option B: Manual start**
+   ```bash
+   # Terminal 1 - Backend
+   cd server
+   npm run dev
+
+   # Terminal 2 - Frontend
+   npm run dev
+   ```
+
+   **Frontend**: http://localhost:5173
+   **Backend API**: http://localhost:5000
 
 ### Installation
 

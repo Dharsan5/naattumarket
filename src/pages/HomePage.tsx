@@ -64,16 +64,16 @@ const HomePage: React.FC = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="container py-16">
-        <div className="text-center mb-12">
-          <h1 className="heading-metal heading-metal-xl mb-lg">
+      <section className="container py-5xl">
+        <div className="text-center mb-4xl">
+          <h1 className="heading-metal heading-metal-xl mb-2xl">
             Welcome to <span className="text-metal-accent">NaattuMarket</span>
           </h1>
-          <p className="text-metal text-lg max-w-2xl mx-auto mb-xl">
+          <p className="text-metal text-lg max-w-2xl mx-auto mb-3xl">
             Discover fresh, organic, and locally sourced products directly from farmers and suppliers. 
             Experience the authentic taste of nature with our premium quality ingredients.
           </p>
-          <div className="flex gap-md justify-center">
+          <div className="flex gap-lg justify-center">
             <button className="btn-metal btn-metal-primary">
               <Package size={16} />
               Shop Now
@@ -87,10 +87,10 @@ const HomePage: React.FC = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid-metal grid-metal-2 mb-16">
+        <div className="grid-metal grid-metal-2 mb-5xl">
           {stats.map((stat, index) => (
             <div key={index} className="metal-glass-card text-center hover-lift">
-              <stat.icon size={32} className="text-metal-accent mx-auto mb-md" />
+              <stat.icon size={32} className="text-metal-accent mx-auto mb-lg" />
               <div className="heading-metal heading-metal-lg mb-sm">{stat.value}</div>
               <div className="text-metal">{stat.label}</div>
             </div>
@@ -99,16 +99,16 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Categories Section */}
-      <section className="container py-16">
-        <h2 className="heading-metal heading-metal-lg text-center mb-xl">
+      <section className="container py-5xl">
+        <h2 className="heading-metal heading-metal-lg text-center mb-3xl">
           Shop by Categories
         </h2>
-        <div className="grid-metal grid-metal-3 mb-16">
+        <div className="grid-metal grid-metal-3 mb-5xl">
           {categories.map((category, index) => (
             <div key={index} className="metal-glass-card text-center hover-lift cursor-pointer">
-              <div className="text-4xl mb-md">{category.icon}</div>
-              <h3 className="heading-metal heading-metal-sm mb-sm">{category.name}</h3>
-              <p className="text-metal mb-md">{category.count} Products</p>
+              <div className="text-4xl mb-xl">{category.icon}</div>
+              <h3 className="heading-metal heading-metal-sm mb-lg">{category.name}</h3>
+              <p className="text-metal mb-xl">{category.count} Products</p>
               <button className="btn-metal w-full">
                 Explore
                 <ArrowRight size={16} />
@@ -119,8 +119,8 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Products */}
-      <section className="container py-16">
-        <div className="flex items-center justify-between mb-xl">
+      <section className="container py-5xl">
+        <div className="flex items-center justify-between mb-3xl">
           <h2 className="heading-metal heading-metal-lg">
             Featured Products
           </h2>
@@ -130,10 +130,10 @@ const HomePage: React.FC = () => {
           </button>
         </div>
         
-        <div className="grid-metal mb-16">
+        <div className="grid-metal mb-5xl">
           {featuredProducts.map((product) => (
             <div key={product.id} className="metal-glass-card hover-lift">
-              <div className="relative mb-md">
+              <div className="relative mb-xl">
                 <div className="text-6xl text-center py-8 bg-gradient-to-br from-sage-silver-light to-sage-silver rounded-lg">
                   {product.image}
                 </div>
@@ -144,9 +144,9 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               
-              <h3 className="heading-metal heading-metal-sm mb-sm">{product.name}</h3>
+              <h3 className="heading-metal heading-metal-sm mb-lg">{product.name}</h3>
               
-              <div className="flex items-center gap-sm mb-md">
+              <div className="flex items-center gap-sm mb-xl">
                 <div className="flex items-center gap-xs">
                   <Star size={14} className="text-metal-accent fill-current" />
                   <span className="text-metal-accent font-medium">{product.rating}</span>
@@ -154,7 +154,7 @@ const HomePage: React.FC = () => {
                 <span className="text-metal">({product.reviews} reviews)</span>
               </div>
               
-              <div className="flex items-center justify-between mb-md">
+              <div className="flex items-center justify-between mb-lg">
                 <div className="flex items-center gap-sm">
                   <span className="heading-metal heading-metal-sm text-metal-accent">
                     {product.price}
@@ -174,17 +174,17 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="container py-16">
+      <section className="container py-5xl">
         <div className="metal-glass-card text-center">
-          <Leaf size={48} className="text-metal-accent mx-auto mb-lg" />
-          <h2 className="heading-metal heading-metal-lg mb-md">
+          <Leaf size={48} className="text-metal-accent mx-auto mb-2xl" />
+          <h2 className="heading-metal heading-metal-lg mb-xl">
             Join Our Growing Community
           </h2>
-          <p className="text-metal mb-xl max-w-2xl mx-auto">
+          <p className="text-metal mb-3xl max-w-2xl mx-auto">
             Connect with local farmers, discover seasonal produce, and support sustainable agriculture. 
             Get fresh updates and exclusive offers delivered to your inbox.
           </p>
-          <div className="flex gap-md justify-center max-w-md mx-auto">
+          <div className="flex gap-lg justify-center max-w-md mx-auto">
             <input 
               type="email" 
               placeholder="Enter your email"

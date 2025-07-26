@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, 
@@ -6,13 +6,33 @@ import {
   Users, 
   ShoppingCart, 
   User,
-  Leaf
+  Leaf,
+  Menu,
+  X,
+  LogIn,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
   
   const isActive = (path: string) => location.pathname === path;
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    closeMobileMenu();
+  };
 
   return (
     <nav className="nav-metal">
@@ -61,62 +81,114 @@ const Navigation: React.FC = () => {
               Cart
             </Link>
           </li>
-          <li>
-            <Link 
-              to="/profile" 
-              className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
-            >
-              <User size={16} />
-              Profile
-            </Link>
-          </li>
+          {isAuthenticated ? (
+            <>
+              <li>
+                <Link 
+                  to="/profile" 
+                  className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+                >
+                  <User size={16} />
+                  {user?.name || 'Profile'}
+                </Link>
+              </li>
+              <li>
+                <button 
+                  onClick={handleLogout}
+                  className="nav-link flex items-center gap-2"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </li>
+            </>
+          ) : (
+            <li>
+              <Link 
+                to="/login" 
+                className={`nav-link ${isActive('/login') ? 'active' : ''}`}
+              >
+                <LogIn size={16} />
+                Login
+              </Link>
+            </li>
+          )}
         </ul>
 
         {/* Mobile Menu Button */}
-        <button className="btn-metal md:hidden">
-          <Package size={16} />
+        <button 
+          className="btn-metal md:hidden"
+          onClick={toggleMobileMenu}
+          aria-label="Toggle mobile menu"
+        >
+          {isMobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
         </button>
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden">
-        <div className="container">
-          <div className="flex justify-around py-2">
+      <div className={`md:hidden transition-all duration-300 ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+        <div className="container border-t border-border-primary">
+          <div className="py-4 space-y-2">
             <Link 
               to="/" 
-              className={`flex flex-col items-center gap-1 p-2 ${isActive('/') ? 'text-metal-accent' : 'text-metal'}`}
+              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
+              onClick={closeMobileMenu}
             >
               <Home size={20} />
-              <span className="text-xs">Home</span>
+              <span>Home</span>
             </Link>
             <Link 
               to="/products" 
-              className={`flex flex-col items-center gap-1 p-2 ${isActive('/products') ? 'text-metal-accent' : 'text-metal'}`}
+              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/products') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
+              onClick={closeMobileMenu}
             >
               <Package size={20} />
-              <span className="text-xs">Products</span>
+              <span>Products</span>
             </Link>
             <Link 
               to="/suppliers" 
-              className={`flex flex-col items-center gap-1 p-2 ${isActive('/suppliers') ? 'text-metal-accent' : 'text-metal'}`}
+              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/suppliers') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
+              onClick={closeMobileMenu}
             >
               <Users size={20} />
-              <span className="text-xs">Suppliers</span>
+              <span>Suppliers</span>
             </Link>
             <Link 
               to="/cart" 
-              className={`flex flex-col items-center gap-1 p-2 ${isActive('/cart') ? 'text-metal-accent' : 'text-metal'}`}
+              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/cart') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
+              onClick={closeMobileMenu}
             >
               <ShoppingCart size={20} />
-              <span className="text-xs">Cart</span>
+              <span>Cart</span>
             </Link>
-            <Link 
-              to="/profile" 
-              className={`flex flex-col items-center gap-1 p-2 ${isActive('/profile') ? 'text-metal-accent' : 'text-metal'}`}
-            >
-              <User size={20} />
-              <span className="text-xs">Profile</span>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link 
+                  to="/profile" 
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/profile') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
+                  onClick={closeMobileMenu}
+                >
+                  <User size={20} />
+                  <span>{user?.name || 'Profile'}</span>
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 p-3 rounded-lg transition-colors text-text-secondary hover:bg-glass-metal-light w-full text-left"
+                >
+                  <LogOut size={20} />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <Link 
+                to="/login" 
+                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/login') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
+                onClick={closeMobileMenu}
+              >
+                <LogIn size={20} />
+                <span>Login</span>
+              </Link>
+            )}
           </div>
         </div>
       </div>
