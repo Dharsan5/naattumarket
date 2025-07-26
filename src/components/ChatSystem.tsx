@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Paperclip, MoreVertical, X, User } from 'lucide-react';
+import { Message } from '../types/chat';
 import '../styles/chat.css';
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'vendor' | 'supplier';
-  timestamp: Date;
-  read: boolean;
-}
 
 interface ChatProps {
   supplierId: number;
@@ -23,129 +16,77 @@ const ChatSystem: React.FC<ChatProps> = ({ supplierId, supplierName, orderId, on
   const [isLoading, setIsLoading] = useState(false);
   const messageEndRef = useRef<HTMLDivElement>(null);
 
-  // Mock initial messages for demo purposes
+  // Load messages from API
   useEffect(() => {
-    // Simulate loading messages from an API
-    setIsLoading(true);
-    
-    // Sample conversation based on chat type
-    const sampleMessages: Message[] = orderId === 'SUPPORT' ? 
-      // Customer support chat
-      [
-        {
-          id: '1',
-          text: 'Hello! Welcome to Nattu Market customer support. How can I help you today?',
-          sender: 'supplier',
-          timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-          read: true,
-        }
-      ] 
-      : orderId ? 
-      // Order-specific conversation
-      [
-      {
-        id: '1',
-        text: `Hello, I'm inquiring about order #${orderId}. When can I expect delivery?`,
-        sender: 'vendor',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-        read: true,
-      },
-      {
-        id: '2',
-        text: `Hello! Your order #${orderId} has been processed and is being prepared for dispatch. Expected delivery is within 24 hours.`,
-        sender: 'supplier',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 1.5), // 1.5 hours ago
-        read: true,
-      },
-      {
-        id: '3',
-        text: "Are all items in stock? I'm particularly concerned about the freshness of the curry leaves.",
-        sender: 'vendor',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 1), // 1 hour ago
-        read: true,
-      },
-      {
-        id: '4',
-        text: 'Yes, all items are in stock. The curry leaves were harvested this morning and will be packed with special care to maintain freshness during delivery.',
-        sender: 'supplier',
-        timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-        read: true,
-      },
-    ] : [
-      {
-        id: '1',
-        text: `Hello, I'm interested in your products. Do you offer wholesale prices?`,
-        sender: 'vendor',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-        read: true,
-      },
-      {
-        id: '2',
-        text: 'Hello! Yes, we do offer special wholesale pricing. What specific products are you interested in?',
-        sender: 'supplier',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 23), // 23 hours ago
-        read: true,
+    const fetchMessages = async () => {
+      try {
+        setIsLoading(true);
+        // Import is inside useEffect to avoid circular dependencies
+        const ChatService = (await import('../services/chatService')).default;
+        
+        // Fetch messages from API service
+        const fetchedMessages = await ChatService.fetchMessages({
+          supplierId,
+          orderId
+        });
+        
+        setMessages(fetchedMessages);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        setMessages([]);
+        setIsLoading(false);
       }
-    ];
+    };
     
-    setTimeout(() => {
-      setMessages(sampleMessages);
-      setIsLoading(false);
-    }, 1000);
-  }, [orderId]);
+    fetchMessages();
+  }, [supplierId, orderId]);
 
   // Auto scroll to bottom when messages change
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (newMessage.trim() === '') return;
     
-    // Create new message
-    const message: Message = {
-      id: Date.now().toString(),
-      text: newMessage,
+    const messageText = newMessage.trim();
+    
+    // Optimistically add message to UI
+    const tempMessage: Message = {
+      id: `temp-${Date.now()}`,
+      text: messageText,
       sender: 'vendor', // Assuming the current user is the vendor
       timestamp: new Date(),
       read: false,
     };
     
-    setMessages([...messages, message]);
+    setMessages([...messages, tempMessage]);
     setNewMessage('');
     
-    // Simulate supplier response after a short delay
-    setTimeout(() => {
-      const responseMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: getAutoResponse(newMessage),
-        sender: 'supplier',
-        timestamp: new Date(),
-        read: false,
-      };
+    try {
+      // Import is inside function to avoid circular dependencies
+      const ChatService = (await import('../services/chatService')).default;
       
-      setMessages(prev => [...prev, responseMessage]);
-    }, 2000);
+      // Send message through API service
+      const sentMessage = await ChatService.sendMessage({
+        supplierId,
+        orderId,
+        text: messageText
+      });
+      
+      // Replace temporary message with actual message from server
+      setMessages(prev => prev.map(msg => 
+        msg.id === tempMessage.id ? sentMessage : msg
+      ));
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Handle error (e.g., show error notification)
+      // Could add a retry button or visual indication that sending failed
+    }
   };
 
-  // Generate automatic response for demo purposes
-  const getAutoResponse = (message: string): string => {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('delivery') || lowerMessage.includes('shipping')) {
-      return 'We typically deliver within 24-48 hours of order confirmation. You can track your order in the order details section.';
-    } else if (lowerMessage.includes('price') || lowerMessage.includes('discount')) {
-      return 'We offer volume-based discounts. Orders above ₹10,000 get 5% off, and orders above ₹25,000 get 10% off.';
-    } else if (lowerMessage.includes('quality') || lowerMessage.includes('fresh')) {
-      return 'All our products are quality checked and guaranteed fresh. We source directly from farms for maximum freshness.';
-    } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-      return 'Hello! How can I help you today?';
-    } else if (lowerMessage.includes('thank')) {
-      return "You're welcome! Feel free to reach out if you have any other questions.";
-    }
-    
-    return "Thank you for your message. We'll get back to you shortly with more information.";
-  };
+
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -212,39 +153,46 @@ const ChatSystem: React.FC<ChatProps> = ({ supplierId, supplierName, orderId, on
               </span>
             </div>
             
-            {messages.map((msg, index) => {
-              // Check if we need to add a date separator
-              const showDateSeparator = index > 0 && 
-                new Date(msg.timestamp).toDateString() !== 
-                new Date(messages[index-1].timestamp).toDateString();
-              
-              return (
-                <React.Fragment key={msg.id}>
-                  {showDateSeparator && (
-                    <div className="chat-date-separator">
-                      <span className="chat-date-text">
-                        {new Date(msg.timestamp).toLocaleDateString()}
-                      </span>
-                    </div>
-                  )}
-                  <div 
-                    className={`message ${msg.sender === 'vendor' ? 'message-outgoing' : 'message-incoming'}`}
-                  >
-                    <div className="message-content">
-                      <p className="message-text">{msg.text}</p>
-                      <span className="message-time">{formatTime(msg.timestamp)}</span>
-                    </div>
-                    {msg.sender === 'vendor' && (
-                      <div className="message-status">
-                        <span className={`status-indicator ${msg.read ? 'status-read' : 'status-sent'}`}>
-                          {msg.read ? 'Read' : 'Sent'}
+            {messages.length > 0 ? (
+              messages.map((msg, index) => {
+                // Check if we need to add a date separator
+                const showDateSeparator = index > 0 && 
+                  new Date(msg.timestamp).toDateString() !== 
+                  new Date(messages[index-1].timestamp).toDateString();
+                
+                return (
+                  <React.Fragment key={msg.id}>
+                    {showDateSeparator && (
+                      <div className="chat-date-separator">
+                        <span className="chat-date-text">
+                          {new Date(msg.timestamp).toLocaleDateString()}
                         </span>
                       </div>
                     )}
-                  </div>
-                </React.Fragment>
-              );
-            })}
+                    <div 
+                      className={`message ${msg.sender === 'vendor' ? 'message-outgoing' : 'message-incoming'}`}
+                    >
+                      <div className="message-content">
+                        <p className="message-text">{msg.text}</p>
+                        <span className="message-time">{formatTime(msg.timestamp)}</span>
+                      </div>
+                      {msg.sender === 'vendor' && (
+                        <div className="message-status">
+                          <span className={`status-indicator ${msg.read ? 'status-read' : 'status-sent'}`}>
+                            {msg.read ? 'Read' : 'Sent'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </React.Fragment>
+                );
+              })
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64 text-center p-4">
+                <p className="text-gray-500 mb-2">No messages yet</p>
+                <p className="text-gray-400 text-sm">Start the conversation by typing a message below</p>
+              </div>
+            )}
             <div ref={messageEndRef} />
           </>
         )}

@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { User, Search, MessageSquare } from 'lucide-react';
 import ChatSystem from '../components/ChatSystem';
+import { Supplier } from '../types/chat';
 import '../styles/chat.css';
-
-interface Supplier {
-  id: number;
-  name: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  unreadCount: number;
-  image?: string;
-  orders?: { id: string; date: Date; status: string }[];
-}
 
 const ChatPage: React.FC = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -33,59 +24,25 @@ const ChatPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Simulate loading suppliers from API
-    const loadSuppliers = async () => {
-      setIsLoading(true);
-      
-      // Mock data
-      const mockSuppliers: Supplier[] = [
-        {
-          id: 1,
-          name: 'Green Valley Farms',
-          lastMessage: 'Your order has been dispatched and will arrive tomorrow.',
-          lastMessageTime: new Date(Date.now() - 1000 * 60 * 30), // 30 mins ago
-          unreadCount: 2,
-          orders: [
-            { id: 'ORD-2023-001', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), status: 'delivered' },
-            { id: 'ORD-2023-045', date: new Date(Date.now() - 1000 * 60 * 60 * 5), status: 'shipping' }
-          ]
-        },
-        {
-          id: 2,
-          name: 'Nature\'s Best',
-          lastMessage: 'We have restocked the curry leaves you inquired about.',
-          lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
-          unreadCount: 0,
-          orders: [
-            { id: 'ORD-2023-032', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), status: 'delivered' }
-          ]
-        },
-        {
-          id: 3,
-          name: 'Golden Harvest',
-          lastMessage: 'Thank you for your order! Let us know if you have any questions.',
-          lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-          unreadCount: 1,
-          orders: [
-            { id: 'ORD-2023-056', date: new Date(Date.now() - 1000 * 60 * 60 * 24), status: 'processing' }
-          ]
-        },
-        {
-          id: 4,
-          name: 'Spice World Exports',
-          lastMessage: 'The special discount for bulk orders is available until this weekend.',
-          lastMessageTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
-          unreadCount: 0
-        }
-      ];
-      
-      setTimeout(() => {
-        setSuppliers(mockSuppliers);
+    const fetchSuppliers = async () => {
+      try {
+        setIsLoading(true);
+        // Import is inside useEffect to avoid circular dependencies
+        const SupplierService = (await import('../services/supplierService')).default;
+        
+        // Fetch suppliers from API service
+        const fetchedSuppliers = await SupplierService.fetchSuppliers();
+        
+        setSuppliers(fetchedSuppliers);
         setIsLoading(false);
-      }, 1000);
+      } catch (error) {
+        console.error('Error fetching suppliers:', error);
+        setSuppliers([]);
+        setIsLoading(false);
+      }
     };
     
-    loadSuppliers();
+    fetchSuppliers();
   }, []);
 
   const filteredSuppliers = suppliers.filter(supplier => 
@@ -107,17 +64,35 @@ const ChatPage: React.FC = () => {
     }
   };
   
-  const handleSelectSupplier = (supplier: Supplier) => {
+  const handleSelectSupplier = async (supplier: Supplier) => {
     setSelectedSupplier(supplier);
     setSelectedOrder(undefined);
     setShowChat(true);
     
-    // Mark messages as read (in a real app, this would call an API)
-    setSuppliers(prev => 
-      prev.map(s => 
-        s.id === supplier.id ? { ...s, unreadCount: 0 } : s
-      )
-    );
+    try {
+      // Import is inside function to avoid circular dependencies
+      const ChatService = (await import('../services/chatService')).default;
+      
+      // Mark messages as read through API service
+      await ChatService.markMessagesAsRead({
+        supplierId: supplier.id
+      });
+      
+      // Update local state for immediate UI feedback
+      setSuppliers(prev => 
+        prev.map(s => 
+          s.id === supplier.id ? { ...s, unreadCount: 0 } : s
+        )
+      );
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+      // We still update the UI optimistically even if the API call fails
+      setSuppliers(prev => 
+        prev.map(s => 
+          s.id === supplier.id ? { ...s, unreadCount: 0 } : s
+        )
+      );
+    }
   };
   
   const handleSelectOrder = (orderId: string) => {
@@ -178,11 +153,11 @@ const ChatPage: React.FC = () => {
                     
                     <div className="chat-list-content">
                       <div className="chat-list-name">{supplier.name}</div>
-                      <div className="chat-list-message">{supplier.lastMessage}</div>
+                      <div className="chat-list-message">{supplier.lastMessage || 'No recent messages'}</div>
                     </div>
                     
                     <div className="chat-list-meta">
-                      <div className="chat-list-time">{formatTime(supplier.lastMessageTime)}</div>
+                      <div className="chat-list-time">{supplier.lastMessageTime ? formatTime(supplier.lastMessageTime) : ''}</div>
                       {supplier.unreadCount > 0 && (
                         <div className="chat-list-badge">{supplier.unreadCount}</div>
                       )}
@@ -203,7 +178,7 @@ const ChatPage: React.FC = () => {
         {shouldShowChat && selectedSupplier ? (
           <div className="w-full md:w-2/3">
             {/* Order Selection (if available) */}
-            {selectedSupplier.orders && selectedSupplier.orders.length > 0 && (
+            {selectedSupplier.orders && selectedSupplier.orders.length > 0 ? (
               <div className="metal-glass-card p-4 mb-4">
                 <h3 className="heading-metal heading-metal-sm mb-3">Select Order Conversation</h3>
                 <div className="flex gap-2 flex-wrap">
@@ -223,6 +198,13 @@ const ChatPage: React.FC = () => {
                       {order.id}
                     </button>
                   ))}
+                </div>
+              </div>
+            ) : (
+              <div className="metal-glass-card p-4 mb-4">
+                <div className="text-center py-3">
+                  <p className="text-metal mb-1">No orders with this supplier yet</p>
+                  <p className="text-sm text-metal-light">This is a general conversation</p>
                 </div>
               </div>
             )}

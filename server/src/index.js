@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import { getSupabase } from './config/database.js';
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -12,6 +13,7 @@ import productRoutes from './routes/products.js';
 import supplierRoutes from './routes/suppliers.js';
 import orderRoutes from './routes/orders.js';
 import userRoutes from './routes/users.js';
+import messageRoutes from './routes/messages.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -86,32 +88,141 @@ app.use('/api/products', productRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/messages', messageRoutes);
 
-// Socket.IO connection handling
+  // Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+  
+  // Authentication for socket connections
+  const token = socket.handshake.auth.token;
+  let userId = null;
+  
+  if (token) {
+    try {
+      // Verify JWT token would be here
+      // For now, we'll assume the token is the userId for simplicity
+      userId = token;
+      console.log(`Authenticated socket for user ${userId}`);
+    } catch (error) {
+      console.error('Socket authentication error:', error);
+    }
+  }
 
   // Join room for order updates
   socket.on('join-order-room', (orderId) => {
+    if (!orderId) return;
     socket.join(`order-${orderId}`);
+    console.log(`Socket ${socket.id} joined room: order-${orderId}`);
+  });
+  
+  // Join supplier chat room
+  socket.on('join-supplier-chat', (supplierId) => {
+    if (!supplierId) return;
+    socket.join(`supplier-${supplierId}`);
+    console.log(`Socket ${socket.id} joined room: supplier-${supplierId}`);
   });
 
   // Handle chat messages
-  socket.on('send-message', (data) => {
-    io.to(`order-${data.orderId}`).emit('new-message', data);
+  socket.on('send-message', async (data) => {
+    try {
+      const { supplierId, orderId, message, recipientId } = data;
+      
+      if (!supplierId || !message || !userId) {
+        return console.error('Invalid message data:', data);
+      }
+      
+      // Save message to database
+      const supabase = getSupabase();
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          content: message.text,
+          user_id: userId,
+          supplier_id: supplierId,
+          order_id: orderId !== 'general' ? orderId : null,
+          recipient_id: recipientId,
+          is_read: false,
+          created_at: new Date().toISOString()
+        });
+        
+      if (error) {
+        console.error('Error saving message:', error);
+        return;
+      }
+      
+      // Emit to supplier chat room
+      io.to(`supplier-${supplierId}`).emit('new-message', {
+        ...data,
+        timestamp: new Date().toISOString()
+      });
+      
+      // If it's an order-specific message, also emit to order room
+      if (orderId && orderId !== 'general') {
+        io.to(`order-${orderId}`).emit('new-message', {
+          ...data,
+          timestamp: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Error handling message:', error);
+    }
   });
 
   // Handle order status updates
   socket.on('order-status-update', (data) => {
-    io.to(`order-${data.orderId}`).emit('status-update', data);
+    const { orderId, status, message } = data;
+    
+    if (!orderId || !status) {
+      return console.error('Invalid order update data:', data);
+    }
+    
+    io.to(`order-${orderId}`).emit('status-update', {
+      orderId,
+      status,
+      message,
+      timestamp: new Date().toISOString()
+    });
+  });
+  
+  // Handle message read status
+  socket.on('mark-messages-read', async (data) => {
+    try {
+      const { supplierId } = data;
+      
+      if (!supplierId || !userId) {
+        return console.error('Invalid read status data:', data);
+      }
+      
+      // Update read status in database
+      const supabase = getSupabase();
+      const { error } = await supabase
+        .from('messages')
+        .update({ is_read: true })
+        .eq('supplier_id', supplierId)
+        .eq('recipient_id', userId)
+        .eq('is_read', false);
+        
+      if (error) {
+        console.error('Error marking messages as read:', error);
+        return;
+      }
+      
+      // Emit read status to supplier chat room
+      io.to(`supplier-${supplierId}`).emit('messages-read', {
+        supplierId,
+        userId,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
   });
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
-});
-
-// Error handling middleware
+});// Error handling middleware
 app.use(errorHandler);
 
 // 404 handler

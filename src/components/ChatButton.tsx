@@ -23,7 +23,7 @@ const ChatButton: React.FC<ChatButtonProps> = ({
         title="Open chat"
         aria-label="Open chat"
       >
-        <MessageCircle size={24} strokeWidth={2} />
+        <MessageCircle size={24} strokeWidth={2} color="#000" />
         {hasNewMessages && <span className="chat-notification-dot"></span>}
       </button>
     );
