@@ -225,25 +225,26 @@ const CartPage: React.FC = () => {
               <span className="heading-metal text-metal-accent">₹{total.toFixed(0)}</span>
             </div>
           </div>
+            </div>
 
-          {deliveryFee > 0 && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 mb-4">
-              <p className="text-amber-400 text-sm">
-                Add ₹{500 - subtotal} more for free delivery!
-              </p>
-            </div>
-          )}
+            {deliveryFee > 0 && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 mb-4">
+                <p className="text-amber-400 text-sm">
+                  Add ₹{500 - subtotal} more for free delivery!
+                </p>
+              </div>
+            )}
 
-          <div className="space-y-3 mb-4">
-            <div className="flex items-center gap-2 text-metal">
-              <Clock size={16} />
-              <span className="text-sm">Delivery in 2-4 hours</span>
+            <div className="space-y-3 mb-4">
+              <div className="flex items-center gap-2 text-metal">
+                <Clock size={16} />
+                <span className="text-sm">Delivery in 2-4 hours</span>
+              </div>
+              <div className="flex items-center gap-2 text-metal">
+                <MapPin size={16} />
+                <span className="text-sm">Deliver to current location</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-metal">
-              <MapPin size={16} />
-              <span className="text-sm">Deliver to current location</span>
-            </div>
-          </div>
 
           <button className="checkout-button btn-metal-primary">
             <ShoppingBag size={16} />
@@ -257,6 +258,4 @@ const CartPage: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default CartPage;
+};export default CartPage;
