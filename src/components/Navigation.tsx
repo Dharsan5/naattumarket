@@ -35,12 +35,12 @@ const Navigation: React.FC = () => {
   };
 
   return (
-    <nav className="nav-metal">
+    <nav className="nav">
       <div className="nav-container">
         {/* Brand */}
         <Link to="/" className="nav-brand">
-          <Leaf size={24} />
-          NaattuMarket
+          <Leaf size={24} className="text-accent" />
+          <span>NaattuMarket</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -50,7 +50,7 @@ const Navigation: React.FC = () => {
               to="/" 
               className={`nav-link ${isActive('/') ? 'active' : ''}`}
             >
-              <Home size={16} />
+              <Home size={18} />
               Home
             </Link>
           </li>
@@ -59,7 +59,7 @@ const Navigation: React.FC = () => {
               to="/products" 
               className={`nav-link ${isActive('/products') ? 'active' : ''}`}
             >
-              <Package size={16} />
+              <Package size={18} />
               Products
             </Link>
           </li>
@@ -68,7 +68,7 @@ const Navigation: React.FC = () => {
               to="/suppliers" 
               className={`nav-link ${isActive('/suppliers') ? 'active' : ''}`}
             >
-              <Users size={16} />
+              <Users size={18} />
               Suppliers
             </Link>
           </li>
@@ -77,121 +77,124 @@ const Navigation: React.FC = () => {
               to="/cart" 
               className={`nav-link ${isActive('/cart') ? 'active' : ''}`}
             >
-              <ShoppingCart size={16} />
+              <ShoppingCart size={18} />
               Cart
             </Link>
           </li>
-          {isAuthenticated ? (
-            <>
-              <li>
-                <Link 
-                  to="/profile" 
-                  className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
-                >
-                  <User size={16} />
-                  {user?.name || 'Profile'}
-                </Link>
-              </li>
-              <li>
-                <button 
-                  onClick={handleLogout}
-                  className="nav-link flex items-center gap-2"
-                >
-                  <LogOut size={16} />
-                  Logout
-                </button>
-              </li>
-            </>
-          ) : (
-            <li>
-              <Link 
-                to="/login" 
-                className={`nav-link ${isActive('/login') ? 'active' : ''}`}
-              >
-                <LogIn size={16} />
-                Login
-              </Link>
-            </li>
-          )}
         </ul>
 
-        {/* Mobile Menu Button */}
-        <button 
-          className="btn-metal md:hidden"
-          onClick={toggleMobileMenu}
-          aria-label="Toggle mobile menu"
-        >
-          {isMobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
-        </button>
+        {/* Auth Section */}
+        <div className="flex items-center gap-2">
+          {isAuthenticated ? (
+            <div className="hidden md:flex items-center gap-2">
+              <Link 
+                to="/profile" 
+                className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+              >
+                <User size={18} />
+                {user?.name || 'Profile'}
+              </Link>
+              <button 
+                onClick={handleLogout}
+                className="btn btn-ghost btn-sm"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link 
+              to="/login" 
+              className="btn btn-primary btn-sm hidden md:inline-flex"
+            >
+              <LogIn size={16} />
+              Sign In
+            </Link>
+          )}
+
+          {/* Mobile Menu Button */}
+          <button 
+            className="btn btn-ghost btn-sm md:hidden"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Navigation */}
-      <div className={`md:hidden transition-all duration-300 ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-        <div className="container border-t border-border-primary">
-          <div className="py-4 space-y-2">
-            <Link 
-              to="/" 
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
-              onClick={closeMobileMenu}
-            >
-              <Home size={20} />
-              <span>Home</span>
-            </Link>
-            <Link 
-              to="/products" 
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/products') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
-              onClick={closeMobileMenu}
-            >
-              <Package size={20} />
-              <span>Products</span>
-            </Link>
-            <Link 
-              to="/suppliers" 
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/suppliers') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
-              onClick={closeMobileMenu}
-            >
-              <Users size={20} />
-              <span>Suppliers</span>
-            </Link>
-            <Link 
-              to="/cart" 
-              className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/cart') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
-              onClick={closeMobileMenu}
-            >
-              <ShoppingCart size={20} />
-              <span>Cart</span>
-            </Link>
-            {isAuthenticated ? (
-              <>
-                <Link 
-                  to="/profile" 
-                  className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/profile') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
-                  onClick={closeMobileMenu}
-                >
-                  <User size={20} />
-                  <span>{user?.name || 'Profile'}</span>
-                </Link>
-                <button 
-                  onClick={handleLogout}
-                  className="flex items-center gap-3 p-3 rounded-lg transition-colors text-text-secondary hover:bg-glass-metal-light w-full text-left"
-                >
-                  <LogOut size={20} />
-                  <span>Logout</span>
-                </button>
-              </>
-            ) : (
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t bg-white">
+          <div className="container py-4">
+            <div className="flex flex-col gap-1">
               <Link 
-                to="/login" 
-                className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isActive('/login') ? 'bg-glass-metal-medium text-text-accent' : 'text-text-secondary hover:bg-glass-metal-light'}`}
+                to="/" 
+                className={`nav-link justify-start ${isActive('/') ? 'active' : ''}`}
                 onClick={closeMobileMenu}
               >
-                <LogIn size={20} />
-                <span>Login</span>
+                <Home size={18} />
+                Home
               </Link>
-            )}
+              <Link 
+                to="/products" 
+                className={`nav-link justify-start ${isActive('/products') ? 'active' : ''}`}
+                onClick={closeMobileMenu}
+              >
+                <Package size={18} />
+                Products
+              </Link>
+              <Link 
+                to="/suppliers" 
+                className={`nav-link justify-start ${isActive('/suppliers') ? 'active' : ''}`}
+                onClick={closeMobileMenu}
+              >
+                <Users size={18} />
+                Suppliers
+              </Link>
+              <Link 
+                to="/cart" 
+                className={`nav-link justify-start ${isActive('/cart') ? 'active' : ''}`}
+                onClick={closeMobileMenu}
+              >
+                <ShoppingCart size={18} />
+                Cart
+              </Link>
+              
+              <div className="border-t my-3"></div>
+              
+              {isAuthenticated ? (
+                <>
+                  <Link 
+                    to="/profile" 
+                    className={`nav-link justify-start ${isActive('/profile') ? 'active' : ''}`}
+                    onClick={closeMobileMenu}
+                  >
+                    <User size={18} />
+                    {user?.name || 'Profile'}
+                  </Link>
+                  <button 
+                    onClick={handleLogout}
+                    className="nav-link justify-start text-left"
+                  >
+                    <LogOut size={18} />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <Link 
+                  to="/login" 
+                  className={`nav-link justify-start ${isActive('/login') ? 'active' : ''}`}
+                  onClick={closeMobileMenu}
+                >
+                  <LogIn size={18} />
+                  Sign In
+                </Link>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 };

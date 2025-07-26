@@ -59,31 +59,38 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen py-5xl">
-      <div className="container">
-        <div className="max-w-md mx-auto">
-          {/* Header */}
-          <div className="text-center mb-4xl">
-            <div className="flex items-center justify-center gap-3 mb-2xl">
-              <div className="p-3 bg-glass-metal-medium rounded-lg">
-                <Leaf size={32} className="text-text-accent" />
-              </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <div className="max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="p-3 bg-primary/10 rounded-2xl">
+              <Leaf size={32} className="text-primary" />
             </div>
-            <h1 className="heading-metal-lg mb-lg">Welcome Back</h1>
-            <p className="text-metal">Sign in to your NaattuMarket account</p>
           </div>
+          <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
+          <p className="text-secondary">Sign in to your NattuMarket account</p>
+        </div>
 
-          {/* Login Form */}
-          <div className="metal-glass-card">
-            <form onSubmit={handleSubmit} className="space-y-xl">
+        {/* Login Form */}
+        <div className="card card-elevated">
+          <div className="p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Error Display */}
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-800">{error}</p>
+                </div>
+              )}
+
               {/* Email Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-sm">
+                <label htmlFor="email" className="block text-sm font-medium mb-2">
                   Email Address
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail size={18} className="text-text-muted" />
+                    <Mail size={18} className="text-tertiary" />
                   </div>
                   <input
                     type="email"
@@ -91,7 +98,7 @@ const LoginPage: React.FC = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="input-metal pl-10"
+                    className="input pl-10"
                     placeholder="your@email.com"
                     required
                   />
@@ -100,12 +107,12 @@ const LoginPage: React.FC = () => {
 
               {/* Password Field */}
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-sm">
+                <label htmlFor="password" className="block text-sm font-medium mb-2">
                   Password
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock size={18} className="text-text-muted" />
+                    <Lock size={18} className="text-tertiary" />
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -113,7 +120,7 @@ const LoginPage: React.FC = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="input-metal pl-10 pr-10"
+                    className="input pl-10 pr-10"
                     placeholder="••••••••"
                     required
                   />
@@ -123,9 +130,9 @@ const LoginPage: React.FC = () => {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff size={18} className="text-text-muted hover:text-text-secondary" />
+                      <EyeOff size={18} className="text-tertiary hover:text-secondary transition" />
                     ) : (
-                      <Eye size={18} className="text-text-muted hover:text-text-secondary" />
+                      <Eye size={18} className="text-tertiary hover:text-secondary transition" />
                     )}
                   </button>
                 </div>
@@ -135,7 +142,7 @@ const LoginPage: React.FC = () => {
               <div className="text-right">
                 <Link 
                   to="/forgot-password" 
-                  className="text-sm text-text-accent hover:text-earth-gold transition-colors"
+                  className="text-sm text-primary hover:text-primary/80 transition"
                 >
                   Forgot your password?
                 </Link>
@@ -145,10 +152,10 @@ const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn-metal-primary w-full justify-center"
+                className="btn btn-primary w-full justify-center"
               >
                 {isLoading ? (
-                  <div className="loading-metal" />
+                  <div className="loading" />
                 ) : (
                   <>
                     Sign In
@@ -159,36 +166,36 @@ const LoginPage: React.FC = () => {
             </form>
 
             {/* Register Link */}
-            <div className="mt-xl pt-xl border-t border-border-primary text-center">
-              <p className="text-text-secondary">
+            <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+              <p className="text-secondary">
                 Don't have an account?{' '}
                 <Link 
                   to="/register" 
-                  className="text-text-accent hover:text-earth-gold font-medium transition-colors"
+                  className="text-primary hover:text-primary/80 font-medium transition"
                 >
                   Create one here
                 </Link>
               </p>
             </div>
           </div>
+        </div>
 
-          {/* Features */}
-          <div className="mt-3xl">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
-              <div className="text-center p-lg">
-                <div className="w-12 h-12 bg-glass-metal-medium rounded-lg flex items-center justify-center mx-auto mb-md">
-                  <Package size={24} className="text-text-accent" />
-                </div>
-                <h3 className="font-medium text-text-primary mb-sm">Quality Products</h3>
-                <p className="text-sm text-text-muted">Fresh, organic products from trusted suppliers</p>
+        {/* Features */}
+        <div className="mt-8">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <Package size={20} className="text-primary" />
               </div>
-              <div className="text-center p-lg">
-                <div className="w-12 h-12 bg-glass-metal-medium rounded-lg flex items-center justify-center mx-auto mb-md">
-                  <Users size={24} className="text-text-accent" />
-                </div>
-                <h3 className="font-medium text-text-primary mb-sm">Local Network</h3>
-                <p className="text-sm text-text-muted">Connect with suppliers in your area</p>
+              <h3 className="font-medium text-sm mb-1">Quality Products</h3>
+              <p className="text-xs text-tertiary">Fresh, organic products from trusted suppliers</p>
+            </div>
+            <div className="text-center p-4">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <Users size={20} className="text-primary" />
               </div>
+              <h3 className="font-medium text-sm mb-1">Local Network</h3>
+              <p className="text-xs text-tertiary">Connect with suppliers in your area</p>
             </div>
           </div>
         </div>

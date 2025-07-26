@@ -1,299 +1,312 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
+  Search, 
   MapPin, 
   Star, 
-  Phone, 
-  Mail, 
-  Package, 
-  Clock,
-  Award,
-  Leaf,
-  Search,
-  Filter
+  Package,
+  Phone,
+  Mail,
+  ArrowRight,
+  Users,
+  Award
 } from 'lucide-react';
+import { SupplierService, Supplier, SupplierFilters } from '../services/supplierService';
+import toast from 'react-hot-toast';
 
 const SuppliersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const suppliers = [
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<SupplierFilters>({
+    page: 1,
+    limit: 12
+  });
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, [filters]);
+
+  const fetchSuppliers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await SupplierService.getSuppliers(filters);
+      
+      if (response.success && response.data) {
+        setSuppliers(response.data.suppliers);
+      } else {
+        setSuppliers(mockSuppliers);
+        if (response.error) {
+          toast.error(response.error);
+        }
+      }
+    } catch (err) {
+      setSuppliers(mockSuppliers);
+      setError('Failed to load suppliers. Showing demo data.');
+      console.error('Supplier fetch error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFilters(prev => ({
+      ...prev,
+      search: searchTerm,
+      page: 1
+    }));
+  };
+
+  const mockSuppliers: Supplier[] = [
     {
-      id: 1,
+      id: "1",
       name: "Green Valley Farms",
-      rating: 4.9,
-      reviews: 245,
-      location: "Ooty, Tamil Nadu",
-      specialties: ["Organic Spices", "Herbs", "Vegetables"],
-      image: "🌱",
-      verified: true,
-      products: 156,
-      deliveryTime: "2-3 days",
-      description: "Certified organic farm specializing in premium spices and herbs grown in the Nilgiri hills.",
-      phone: "+91 98765 43210",
       email: "contact@greenvalley.com",
-      established: "2015",
-      certifications: ["Organic", "Fair Trade", "ISO 9001"]
-    },
-    {
-      id: 2,
-      name: "Nature's Best",
-      rating: 4.8,
-      reviews: 189,
-      location: "Coimbatore, Tamil Nadu",
-      specialties: ["Fresh Herbs", "Leafy Greens", "Microgreens"],
-      image: "🍃",
-      verified: true,
-      products: 89,
-      deliveryTime: "1-2 days",
-      description: "Family-owned farm providing fresh herbs and greens with same-day harvest guarantee.",
-      phone: "+91 98765 43211",
-      email: "hello@naturesbest.com",
-      established: "2018",
-      certifications: ["Organic", "Local Certified"]
-    },
-    {
-      id: 3,
-      name: "Coastal Farms",
-      rating: 4.7,
-      reviews: 134,
-      location: "Kanyakumari, Tamil Nadu",
-      specialties: ["Coconut Products", "Sea Salt", "Tropical Fruits"],
-      image: "🥥",
-      verified: true,
-      products: 67,
-      deliveryTime: "3-4 days",
-      description: "Coastal farm specializing in coconut products and tropical produce from Tamil Nadu's southern coast.",
-      phone: "+91 98765 43212",
-      email: "info@coastalfarms.com",
-      established: "2012",
-      certifications: ["Organic", "Coastal Certified"]
-    },
-    {
-      id: 4,
-      name: "Spice Masters",
+      phone: "+91 9876543210",
+      business_type: "Farm",
       rating: 4.9,
-      reviews: 298,
-      location: "Kumbakonam, Tamil Nadu",
-      specialties: ["Traditional Spices", "Spice Blends", "Dry Fruits"],
-      image: "🌶️",
+      reviews_count: 156,
+      description: "Family-owned organic farm specializing in premium spices and herbs",
+      location: {
+        address: "Mysore Road, Bangalore",
+        city: "Bangalore",
+        state: "Karnataka",
+        postal_code: "560059"
+      },
       verified: true,
-      products: 203,
-      deliveryTime: "2-3 days",
-      description: "Three generations of spice expertise, offering authentic Tamil Nadu spice blends and premium dry fruits.",
-      phone: "+91 98765 43213",
-      email: "orders@spicemasters.com",
-      established: "1987",
-      certifications: ["Traditional", "Premium Quality", "Export Grade"]
+      created_at: "2020-01-15T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z"
     },
     {
-      id: 5,
-      name: "Golden Harvest",
-      rating: 4.6,
-      reviews: 167,
-      location: "Thanjavur, Tamil Nadu",
-      specialties: ["Rice Varieties", "Millets", "Pulses"],
-      image: "🌾",
-      verified: true,
-      products: 124,
-      deliveryTime: "2-4 days",
-      description: "Premium rice and grain supplier from the rice bowl of Tamil Nadu, offering traditional and organic varieties.",
-      phone: "+91 98765 43214",
-      email: "sales@goldenharvest.com",
-      established: "2010",
-      certifications: ["Organic", "Traditional", "Quality Assured"]
-    },
-    {
-      id: 6,
-      name: "Herb Garden Co.",
+      id: "2",
+      name: "Nature's Best Organic",
+      email: "info@naturesbest.com",
+      phone: "+91 9876543211",
+      business_type: "Processor",
       rating: 4.8,
-      reviews: 156,
-      location: "Kodaikanal, Tamil Nadu",
-      specialties: ["Medicinal Herbs", "Aromatic Plants", "Essential Oils"],
-      image: "🌿",
+      reviews_count: 203,
+      description: "Leading processor of coconut-based products and traditional spices",
+      location: {
+        address: "Cochin Industrial Area",
+        city: "Kochi",
+        state: "Kerala",
+        postal_code: "682030"
+      },
+      verified: true,
+      created_at: "2019-03-20T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z"
+    },
+    {
+      id: "3",
+      name: "Coastal Farms Collective",
+      email: "hello@coastalfarms.com",
+      phone: "+91 9876543212",
+      business_type: "Cooperative",
+      rating: 4.7,
+      reviews_count: 89,
+      description: "Farmer collective promoting sustainable coastal agriculture",
+      location: {
+        address: "ECR Main Road, Mahabalipuram",
+        city: "Chennai",
+        state: "Tamil Nadu",
+        postal_code: "603104"
+      },
+      verified: true,
+      created_at: "2021-06-10T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z"
+    },
+    {
+      id: "4",
+      name: "Spice Masters Ltd",
+      email: "orders@spicemasters.com",
+      phone: "+91 9876543213",
+      business_type: "Trader",
+      rating: 4.6,
+      reviews_count: 124,
+      description: "Three generations of spice trading expertise",
+      location: {
+        address: "Spice Market, Old City",
+        city: "Hyderabad",
+        state: "Telangana",
+        postal_code: "500002"
+      },
+      verified: true,
+      created_at: "2018-11-05T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z"
+    },
+    {
+      id: "5",
+      name: "Rice Valley Exports",
+      email: "export@ricevalley.com",
+      phone: "+91 9876543214",
+      business_type: "Exporter",
+      rating: 4.5,
+      reviews_count: 78,
+      description: "Premium rice exporter with focus on heritage varieties",
+      location: {
+        address: "Industrial Estate, Thanjavur",
+        city: "Thanjavur",
+        state: "Tamil Nadu",
+        postal_code: "613005"
+      },
       verified: false,
-      products: 78,
-      deliveryTime: "3-5 days",
-      description: "Hill station herb garden specializing in medicinal and aromatic plants grown in cool mountain climate.",
-      phone: "+91 98765 43215",
-      email: "contact@herbgarden.com",
-      established: "2019",
-      certifications: ["Medicinal Grade", "Hill Grown"]
+      created_at: "2022-02-28T00:00:00Z",
+      updated_at: "2024-01-01T00:00:00Z"
     }
   ];
 
-  const filteredSuppliers = suppliers.filter(supplier =>
-    supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supplier.specialties.some(specialty => 
-      specialty.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  const SupplierCard = ({ supplier }: { supplier: typeof suppliers[0] }) => (
-    <div className="metal-glass-card hover-lift">
-      <div className="flex items-start gap-lg mb-lg">
-        <div className="text-4xl bg-gradient-to-br from-sage-silver-light to-sage-silver rounded-lg p-4">
-          {supplier.image}
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-sm mb-sm">
-            <h3 className="heading-metal heading-metal-md">{supplier.name}</h3>
+  const SupplierCard: React.FC<{ supplier: Supplier }> = ({ supplier }) => (
+    <div className="card card-elevated group">
+      <div className="p-6">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center text-2xl">
+            🏪
+          </div>
+          <div className="flex items-center gap-2">
             {supplier.verified && (
-              <Award size={16} className="text-metal-accent" />
+              <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                <Award size={12} />
+                Verified
+              </div>
+            )}
+            {supplier.rating && (
+              <div className="flex items-center gap-1">
+                <Star className="text-yellow-400 fill-current" size={16} />
+                <span className="font-semibold">{supplier.rating}</span>
+              </div>
             )}
           </div>
-          <div className="flex items-center gap-sm mb-sm">
-            <Star size={14} className="text-metal-accent fill-current" />
-            <span className="text-metal-accent font-medium">{supplier.rating}</span>
-            <span className="text-metal">({supplier.reviews} reviews)</span>
+        </div>
+
+        {/* Supplier Info */}
+        <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition">{supplier.name}</h3>
+        <div className="flex items-center gap-1 text-secondary mb-2">
+          <MapPin size={16} />
+          <span>{supplier.location.city}, {supplier.location.state}</span>
+        </div>
+        {supplier.description && (
+          <p className="text-sm text-secondary mb-4">{supplier.description}</p>
+        )}
+
+        {/* Business Type */}
+        <div className="mb-4">
+          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+            {supplier.business_type}
+          </span>
+        </div>
+
+        {/* Stats */}
+        {supplier.reviews_count && (
+          <div className="mb-6 text-center text-sm">
+            <div className="font-semibold text-primary">{supplier.reviews_count}</div>
+            <div className="text-tertiary">Reviews</div>
           </div>
-          <div className="flex items-center gap-sm text-metal">
-            <MapPin size={14} />
-            <span>{supplier.location}</span>
+        )}
+
+        {/* Contact Info */}
+        <div className="space-y-2 mb-6 text-sm">
+          <div className="flex items-center gap-2 text-secondary">
+            <Phone size={14} />
+            <span>{supplier.phone}</span>
+          </div>
+          <div className="flex items-center gap-2 text-secondary">
+            <Mail size={14} />
+            <span>{supplier.email}</span>
           </div>
         </div>
-      </div>
 
-      <p className="text-metal mb-lg">{supplier.description}</p>
-
-      <div className="grid grid-cols-2 gap-md mb-lg">
-        <div className="flex items-center gap-sm">
-          <Package size={16} className="text-metal-accent" />
-          <span className="text-metal">{supplier.products} Products</span>
+        {/* Actions */}
+        <div className="flex gap-2">
+          <button className="btn btn-primary flex-1">
+            View Profile
+            <ArrowRight size={16} />
+          </button>
+          <button className="btn btn-secondary">
+            Contact
+          </button>
         </div>
-        <div className="flex items-center gap-sm">
-          <Clock size={16} className="text-metal-accent" />
-          <span className="text-metal">{supplier.deliveryTime}</span>
-        </div>
-        <div className="flex items-center gap-sm">
-          <Leaf size={16} className="text-metal-accent" />
-          <span className="text-metal">Est. {supplier.established}</span>
-        </div>
-        <div className="flex items-center gap-sm">
-          <Award size={16} className="text-metal-accent" />
-          <span className="text-metal">{supplier.certifications.length} Certs</span>
-        </div>
-      </div>
-
-      <div className="mb-lg">
-        <h4 className="heading-metal heading-metal-sm mb-sm">Specialties</h4>
-        <div className="flex flex-wrap gap-sm">
-          {supplier.specialties.map((specialty, index) => (
-            <span key={index} className="badge-metal">
-              {specialty}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-lg">
-        <h4 className="heading-metal heading-metal-sm mb-sm">Certifications</h4>
-        <div className="flex flex-wrap gap-sm">
-          {supplier.certifications.map((cert, index) => (
-            <span key={index} className="badge-metal badge-metal-accent">
-              {cert}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex gap-md">
-        <button className="btn-metal flex-1">
-          <Package size={16} />
-          View Products
-        </button>
-        <button className="btn-metal">
-          <Phone size={16} />
-        </button>
-        <button className="btn-metal">
-          <Mail size={16} />
-        </button>
       </div>
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="container py-20">
+        <div className="text-center">
+          <div className="loading mx-auto mb-4"></div>
+          <p className="text-secondary">Loading suppliers...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container py-8">
-      {/* Header */}
-      <div className="mb-xl">
-        <h1 className="heading-metal heading-metal-xl mb-md">Our Suppliers</h1>
-        <p className="text-metal">Connect with verified local farmers and suppliers across Tamil Nadu</p>
-      </div>
-
-      {/* Search and Stats */}
-      <div className="metal-glass-card mb-xl">
-        <div className="flex flex-col md:flex-row gap-lg items-center justify-between mb-lg">
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-metal-accent" />
-              <input
-                type="text"
-                placeholder="Search suppliers by name, location, or specialty..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-metal pl-12"
-              />
+    <div className="min-h-screen bg-gray-50">
+      <div className="container py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Suppliers</h1>
+          <p className="text-secondary">Connect with verified suppliers and farmers</p>
+          {error && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">{error}</p>
             </div>
-          </div>
-          
-          <button className="btn-metal">
-            <Filter size={16} />
-            Filters
-          </button>
+          )}
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
-          <div className="text-center">
-            <div className="heading-metal heading-metal-lg text-metal-accent">200+</div>
-            <div className="text-metal">Total Suppliers</div>
-          </div>
-          <div className="text-center">
-            <div className="heading-metal heading-metal-lg text-metal-accent">150+</div>
-            <div className="text-metal">Verified</div>
-          </div>
-          <div className="text-center">
-            <div className="heading-metal heading-metal-lg text-metal-accent">4.8★</div>
-            <div className="text-metal">Avg Rating</div>
-          </div>
-          <div className="text-center">
-            <div className="heading-metal heading-metal-lg text-metal-accent">2-3h</div>
-            <div className="text-metal">Avg Delivery</div>
+        {/* Search */}
+        <div className="card mb-8">
+          <div className="p-6">
+            <form onSubmit={handleSearch} className="flex gap-4 items-end">
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-2">Search Suppliers</label>
+                <div className="relative">
+                  <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-tertiary" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, location, or business type..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="input pl-10"
+                  />
+                </div>
+              </div>
+
+              <button type="submit" className="btn btn-primary">
+                <Search size={16} />
+                Search
+              </button>
+            </form>
           </div>
         </div>
-      </div>
 
-      {/* Suppliers Grid */}
-      <div className="grid-metal">
-        {filteredSuppliers.map((supplier) => (
-          <SupplierCard key={supplier.id} supplier={supplier} />
-        ))}
-      </div>
+        {/* Suppliers Grid */}
+        {suppliers.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {suppliers.map((supplier) => (
+              <SupplierCard key={supplier.id} supplier={supplier} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-20">
+            <Users size={64} className="mx-auto mb-4 text-tertiary" />
+            <h3 className="text-xl font-semibold mb-2">No suppliers found</h3>
+            <p className="text-secondary">Try adjusting your search or filters</p>
+          </div>
+        )}
 
-      {/* Empty State */}
-      {filteredSuppliers.length === 0 && (
-        <div className="metal-glass-card text-center py-16">
-          <Search size={48} className="text-metal-accent mx-auto mb-lg" />
-          <h3 className="heading-metal heading-metal-md mb-md">No suppliers found</h3>
-          <p className="text-metal mb-lg">Try adjusting your search criteria</p>
-          <button 
-            onClick={() => setSearchTerm('')}
-            className="btn-metal btn-metal-primary"
-          >
-            Clear Search
-          </button>
-        </div>
-      )}
-
-      {/* Call to Action */}
-      <div className="metal-glass-card text-center mt-xl">
-        <Leaf size={48} className="text-metal-accent mx-auto mb-lg" />
-        <h3 className="heading-metal heading-metal-lg mb-md">Become a Supplier</h3>
-        <p className="text-metal mb-xl max-w-2xl mx-auto">
-          Join our network of trusted suppliers and reach thousands of customers looking for fresh, quality products.
-        </p>
-        <button className="btn-metal btn-metal-primary">
-          Apply to Become Supplier
-        </button>
+        {/* Load More */}
+        {suppliers.length > 0 && (
+          <div className="text-center mt-12">
+            <button className="btn btn-secondary">
+              Load More Suppliers
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

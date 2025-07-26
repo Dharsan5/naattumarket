@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
-  Grid, 
+  Grid3X3, 
   List, 
   Star,
   ShoppingCart,
   Heart,
-  SlidersHorizontal,
+  ArrowUpDown,
   Package
 } from 'lucide-react';
 import { ProductService, Product, ProductFilters } from '../services/productService';
@@ -25,14 +25,13 @@ const ProductsPage: React.FC = () => {
     sortBy: 'created_at',
     sortOrder: 'desc'
   });
-  const [productCategories, setProductCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
 
-  // Fetch products on component mount and when filters change
   useEffect(() => {
     fetchProducts();
   }, [filters]);
 
-  // Fetch categories on component mount
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -47,14 +46,12 @@ const ProductsPage: React.FC = () => {
       if (response.success && response.data) {
         setProducts(response.data.products);
       } else {
-        // Fallback to mock data if API fails
         setProducts(mockProducts);
         if (response.error) {
           toast.error(response.error);
         }
       }
     } catch (err) {
-      // Fallback to mock data
       setProducts(mockProducts);
       setError('Failed to load products. Showing demo data.');
       console.error('Product fetch error:', err);
@@ -67,11 +64,10 @@ const ProductsPage: React.FC = () => {
     try {
       const response = await ProductService.getCategories();
       if (response.success && response.data) {
-        setProductCategories(response.data);
+        setCategories(response.data);
       }
     } catch (err) {
-      // Use default categories if API fails
-      setProductCategories(['Spices', 'Herbs', 'Oil', 'Rice', 'Pulses', 'Vegetables']);
+      setCategories(['Spices', 'Herbs', 'Oil', 'Rice', 'Pulses', 'Vegetables']);
     }
   };
 
@@ -84,23 +80,15 @@ const ProductsPage: React.FC = () => {
     }));
   };
 
-  const handleCategoryFilter = (category: string) => {
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
     setFilters(prev => ({
       ...prev,
-      category: prev.category === category ? undefined : category,
+      category: category || undefined,
       page: 1
     }));
   };
 
-  const handleSortChange = (sortBy: string) => {
-    setFilters(prev => ({
-      ...prev,
-      sortBy: sortBy as any,
-      page: 1
-    }));
-  };
-
-  // Mock products as fallback
   const mockProducts: Product[] = [
     {
       id: "1",
@@ -200,56 +188,63 @@ const ProductsPage: React.FC = () => {
     }
   ];
 
-  const allCategories = ["All", ...productCategories];
-
-  const renderProductCard = (product: Product) => (
-    <div key={product.id} className="metal-glass-card hover-lift">
-      <div className="relative mb-lg">
-        <div className="text-4xl mb-md text-center">
+  const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
+    <div className="card card-elevated group">
+      <div className="relative p-6">
+        {/* Product Image */}
+        <div className="text-4xl text-center mb-4">
           {product.image_url || "📦"}
         </div>
+        
+        {/* Sale Badge */}
         {product.original_price && product.original_price > product.price && (
-          <div className="badge-metal-accent absolute top-2 right-2">
+          <div className="absolute top-3 right-3 bg-primary text-white text-xs px-2 py-1 rounded-full">
             Sale
           </div>
         )}
+        
+        {/* Out of Stock Overlay */}
         {!product.in_stock && (
-          <div className="absolute inset-0 bg-glass-metal-dark bg-opacity-50 flex items-center justify-center rounded-lg">
-            <span className="badge-metal">Out of Stock</span>
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
+            <span className="text-sm font-medium text-gray-500">Out of Stock</span>
           </div>
         )}
       </div>
 
-      <div className="mb-lg">
-        <h3 className="font-semibold text-text-primary mb-sm">{product.name}</h3>
-        <p className="text-metal-accent text-sm mb-md">by {product.supplier_name}</p>
-        <p className="text-sm text-text-muted mb-md">{product.description}</p>
+      <div className="px-6 pb-6">
+        {/* Product Info */}
+        <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition">{product.name}</h3>
+        <p className="text-sm text-secondary mb-3">by {product.supplier_name}</p>
         
-        <div className="flex items-center gap-2 mb-md">
+        {/* Rating */}
+        <div className="flex items-center gap-2 mb-3">
           <div className="flex items-center gap-1">
-            <Star size={16} className="text-earth-gold fill-current" />
+            <Star size={16} className="text-yellow-400 fill-current" />
             <span className="text-sm font-medium">{product.rating}</span>
-            <span className="text-metal">({product.reviews_count})</span>
           </div>
+          <span className="text-sm text-tertiary">({product.reviews_count})</span>
+        </div>
+        
+        {/* Price */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xl font-semibold">₹{product.price}</span>
+          {product.original_price && product.original_price > product.price && (
+            <span className="text-sm text-tertiary line-through">
+              ₹{product.original_price}
+            </span>
+          )}
         </div>
 
-        <div className="flex items-center gap-2 mb-lg">
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-text-primary">₹{product.price}</span>
-            {product.original_price && product.original_price > product.price && (
-              <span className="text-sm text-text-muted line-through">
-                ₹{product.original_price}
-              </span>
-            )}
-          </div>
-        </div>
-
+        {/* Actions */}
         <div className="flex gap-2">
-          <button className="btn-metal-primary flex-1" disabled={!product.in_stock}>
+          <button 
+            className="btn btn-primary flex-1"
+            disabled={!product.in_stock}
+          >
             <ShoppingCart size={16} />
             {product.in_stock ? 'Add to Cart' : 'Out of Stock'}
           </button>
-          <button className="btn-metal p-sm">
+          <button className="btn btn-secondary">
             <Heart size={16} />
           </button>
         </div>
@@ -259,119 +254,130 @@ const ProductsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container py-5xl">
+      <div className="container py-20">
         <div className="text-center">
-          <div className="loading-metal mx-auto mb-md" style={{ width: '40px', height: '40px' }} />
-          <p className="text-metal">Loading products...</p>
+          <div className="loading mx-auto mb-4"></div>
+          <p className="text-secondary">Loading products...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container py-5xl">
-      {/* Header */}
-      <div className="mb-4xl">
-        <h1 className="heading-metal-xl mb-lg">Products</h1>
-        <p className="text-metal">Discover fresh, organic products from local suppliers</p>
-        {error && (
-          <div className="mt-md p-md bg-glass-metal-medium border border-border-accent rounded-lg">
-            <p className="text-sm text-text-accent">{error}</p>
-          </div>
-        )}
-      </div>
-
-      {/* Search and Filters */}
-      <div className="metal-glass-card mb-3xl">
-        <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-lg items-center justify-between">
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-muted" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-metal pl-12"
-              />
+    <div className="min-h-screen bg-gray-50">
+      <div className="container py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Products</h1>
+          <p className="text-secondary">Discover fresh, organic products from local suppliers</p>
+          {error && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">{error}</p>
             </div>
-          </div>
-          
-          <div className="flex gap-md items-center">
-            {/* View Mode Toggle */}
-            <div className="flex bg-glass-metal-light rounded-lg p-1">
-              <button
-                type="button"
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-glass-metal-medium text-text-accent' : 'text-text-muted'}`}
-              >
-                <Grid size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-glass-metal-medium text-text-accent' : 'text-text-muted'}`}
-              >
-                <List size={16} />
-              </button>
-            </div>
-
-            {/* Sort Dropdown */}
-            <select
-              value={filters.sortBy}
-              onChange={(e) => handleSortChange(e.target.value)}
-              className="input-metal"
-            >
-              <option value="created_at">Newest</option>
-              <option value="price">Price</option>
-              <option value="rating">Rating</option>
-              <option value="name">Name</option>
-            </select>
-
-            <button type="submit" className="btn-metal-primary">
-              <Search size={16} />
-              Search
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Category Filter */}
-      <div className="mb-3xl">
-        <div className="flex flex-wrap gap-sm">
-          {allCategories.map((category) => (
-            <button
-              key={category}
-              onClick={() => handleCategoryFilter(category === 'All' ? '' : category)}
-              className={`btn-metal ${filters.category === category || (category === 'All' && !filters.category) ? 'btn-metal-primary' : ''}`}
-            >
-              {category}
-            </button>
-          ))}
+          )}
         </div>
-      </div>
 
-      {/* Products Grid */}
-      <div className={viewMode === 'grid' ? 'grid-metal' : 'space-y-lg'}>
+        {/* Search & Filters */}
+        <div className="card mb-8">
+          <div className="p-6">
+            <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4 items-end">
+              {/* Search */}
+              <div className="flex-1">
+                <label className="block text-sm font-medium mb-2">Search Products</label>
+                <div className="relative">
+                  <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-tertiary" />
+                  <input
+                    type="text"
+                    placeholder="Search for products..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="input pl-10"
+                  />
+                </div>
+              </div>
+              
+              {/* Category Filter */}
+              <div className="w-full md:w-48">
+                <label className="block text-sm font-medium mb-2">Category</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  className="input"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Sort */}
+              <div className="w-full md:w-48">
+                <label className="block text-sm font-medium mb-2">Sort By</label>
+                <select
+                  value={filters.sortBy}
+                  onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
+                  className="input"
+                >
+                  <option value="created_at">Newest</option>
+                  <option value="price">Price</option>
+                  <option value="rating">Rating</option>
+                  <option value="name">Name</option>
+                </select>
+              </div>
+
+              {/* View Toggle */}
+              <div className="flex border rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('grid')}
+                  className={`p-3 ${viewMode === 'grid' ? 'bg-primary text-white' : 'bg-white text-secondary'} transition`}
+                >
+                  <Grid3X3 size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('list')}
+                  className={`p-3 ${viewMode === 'list' ? 'bg-primary text-white' : 'bg-white text-secondary'} transition`}
+                >
+                  <List size={18} />
+                </button>
+              </div>
+
+              <button type="submit" className="btn btn-primary">
+                <Search size={16} />
+                Search
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Products Grid */}
         {products.length > 0 ? (
-          products.map(renderProductCard)
+          <div className={`grid ${viewMode === 'grid' ? 'grid-auto-fit' : 'grid-cols-1'} gap-6`}>
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         ) : (
-          <div className="col-span-full text-center py-5xl">
-            <Package size={64} className="mx-auto mb-lg text-text-muted" />
-            <h3 className="heading-metal-md mb-md">No products found</h3>
-            <p className="text-metal">Try adjusting your search or filters</p>
+          <div className="text-center py-20">
+            <Package size={64} className="mx-auto mb-4 text-tertiary" />
+            <h3 className="text-xl font-semibold mb-2">No products found</h3>
+            <p className="text-secondary">Try adjusting your search or filters</p>
+          </div>
+        )}
+
+        {/* Load More */}
+        {products.length > 0 && (
+          <div className="text-center mt-12">
+            <button className="btn btn-secondary">
+              Load More Products
+            </button>
           </div>
         )}
       </div>
-
-      {/* Load More */}
-      {products.length > 0 && (
-        <div className="text-center mt-4xl">
-          <button className="btn-metal-primary">
-            Load More Products
-          </button>
-        </div>
-      )}
     </div>
   );
 };
