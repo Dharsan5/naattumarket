@@ -8,11 +8,15 @@ import {
   MapPin,
   Clock,
   Tag,
-  ArrowRight
+  ArrowRight,
+  MessageCircle
 } from 'lucide-react';
 import '../styles/cart.css';
+import OrderChat from '../components/OrderChat';
 
 const CartPage: React.FC = () => {
+  const [activeChat, setActiveChat] = useState<number | null>(null);
+  
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -87,7 +91,21 @@ const CartPage: React.FC = () => {
         
         <div className="flex-1 cart-item-details">
           <h3 className="heading-metal heading-metal-sm mb-xs cart-item-name">{item.name}</h3>
-          <p className="text-metal text-sm mb-sm">by {item.supplier}</p>
+          <div className="flex items-center justify-between mb-sm">
+            <p className="text-metal text-sm flex items-center gap-1">
+              by {item.supplier}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveChat(item.id);
+                }}
+                className="ml-2 p-1 hover:bg-primary-500/10 rounded-full"
+                title="Chat with supplier"
+              >
+                <MessageCircle size={14} className="text-metal-accent" />
+              </button>
+            </p>
+          </div>
           
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-sm">
@@ -150,6 +168,26 @@ const CartPage: React.FC = () => {
         <h1 className="cart-title heading-metal heading-metal-xl">Shopping Cart</h1>
         <span className="badge-metal">{cartItems.length} items</span>
       </div>
+
+      {/* Chat modal overlay */}
+      {activeChat && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setActiveChat(null)}>
+          <div className="relative max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
+            <button 
+              onClick={() => setActiveChat(null)} 
+              className="absolute -top-10 right-0 text-white hover:text-gray-300 p-2"
+              aria-label="Close chat"
+            >
+              <Trash2 size={20} />
+            </button>
+            <OrderChat 
+              orderId="ORD-123456"
+              supplierId={activeChat}
+              supplierName={cartItems.find(item => item.id === activeChat)?.supplier || "Supplier"}
+            />
+          </div>
+        </div>
+      )}
 
       <div className="cart-container">
         {/* Cart Items */}
