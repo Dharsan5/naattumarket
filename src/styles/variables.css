@@ -1,0 +1,102 @@
+/* Design System Variables - Metallic Nature Theme */
+/* Professional compact sleek design with metallic effects and noisy grain */
+
+/* Nature-inspired Metallic Color Palette */
+:root {
+  /* Primary Nature Metallics */
+  --forest-bronze: #4a5d23;
+  --forest-bronze-light: #5a6d33;
+  --forest-bronze-dark: #3a4d13;
+  
+  --sage-silver: #8b9471;
+  --sage-silver-light: #9ba481;
+  --sage-silver-dark: #7b8461;
+  
+  --moss-copper: #6b5b47;
+  --moss-copper-light: #7b6b57;
+  --moss-copper-dark: #5b4b37;
+  
+  --earth-gold: #b8860b;
+  --earth-gold-light: #c8961b;
+  --earth-gold-dark: #a8760b;
+  
+  /* Background Gradients */
+  --bg-primary: linear-gradient(135deg, #1a1f16 0%, #2d3728 50%, #1a1f16 100%);
+  --bg-secondary: linear-gradient(135deg, #2d3728 0%, #3d4738 50%, #2d3728 100%);
+  --bg-tertiary: linear-gradient(135deg, #3d4738 0%, #4d5748 50%, #3d4738 100%);
+  
+  /* Glass Metallic Effects */
+  --glass-metal-light: rgba(139, 148, 113, 0.15);
+  --glass-metal-medium: rgba(139, 148, 113, 0.25);
+  --glass-metal-heavy: rgba(139, 148, 113, 0.35);
+  
+  /* Metallic Shine Effects */
+  --shine-gradient: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.3) 45%,
+    rgba(255, 255, 255, 0.1) 55%,
+    transparent 70%
+  );
+  
+  /* Noise Textures */
+  --noise-opacity: 0.06;
+  --grain-overlay: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' result='noise'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
+  
+  /* Text Colors */
+  --text-primary: #f4f5f2;
+  --text-secondary: #d4d6d1;
+  --text-tertiary: #b4b6b1;
+  --text-muted: #94968f;
+  --text-accent: var(--earth-gold);
+  
+  /* Border Colors */
+  --border-primary: rgba(139, 148, 113, 0.3);
+  --border-secondary: rgba(139, 148, 113, 0.2);
+  --border-accent: var(--earth-gold);
+  
+  /* Shadow Effects */
+  --shadow-metal-sm: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --shadow-metal-md: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  --shadow-metal-lg: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  --shadow-glow: 0 0 20px rgba(184, 134, 11, 0.3);
+  
+  /* Spacing System (Compact) */
+  --space-xs: 0.25rem;  /* 4px */
+  --space-sm: 0.5rem;   /* 8px */
+  --space-md: 0.75rem;  /* 12px */
+  --space-lg: 1rem;     /* 16px */
+  --space-xl: 1.5rem;   /* 24px */
+  --space-2xl: 2rem;    /* 32px */
+  --space-3xl: 3rem;    /* 48px */
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;  /* 6px */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-xl: 1rem;      /* 16px */
+  --radius-2xl: 1.5rem;   /* 24px */
+  
+  /* Typography */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  /* Animation */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Z-index */
+  --z-dropdown: 10;
+  --z-modal: 20;
+  --z-tooltip: 30;
+  --z-navigation: 40;
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --noise-opacity: 0.08;
+  }
+}
