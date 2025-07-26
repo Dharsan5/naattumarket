@@ -10,7 +10,11 @@ import {
   MapPin,
   TrendingUp,
   Award,
-  CheckCircle
+  CheckCircle,
+  BarChart,
+  LineChart,
+  PieChart,
+  Zap
 } from 'lucide-react';
 
 const HomePage: React.FC = () => {
@@ -27,7 +31,7 @@ const HomePage: React.FC = () => {
     },
     {
       icon: <Truck className="text-primary" size={24} />,
-      title: "Fresh Delivery",
+      title: "Fast Delivery",
       description: "Farm-fresh products delivered to your doorstep"
     },
     {
@@ -38,12 +42,12 @@ const HomePage: React.FC = () => {
   ];
 
   const categories = [
-    { name: "Fresh Spices", emoji: "🌿", count: "50+ products" },
-    { name: "Organic Herbs", emoji: "🍃", count: "30+ products" },
-    { name: "Natural Oils", emoji: "🥥", count: "25+ products" },
-    { name: "Premium Rice", emoji: "🍚", count: "20+ products" },
-    { name: "Pure Honey", emoji: "🍯", count: "15+ products" },
-    { name: "Traditional Pulses", emoji: "🫘", count: "40+ products" }
+    { name: "Fresh Spices", icon: <BarChart size={24} />, count: "50+ products" },
+    { name: "Organic Herbs", icon: <LineChart size={24} />, count: "30+ products" },
+    { name: "Natural Oils", icon: <PieChart size={24} />, count: "25+ products" },
+    { name: "Premium Rice", icon: <Zap size={24} />, count: "20+ products" },
+    { name: "Pure Honey", icon: <Award size={24} />, count: "15+ products" },
+    { name: "Traditional Pulses", icon: <TrendingUp size={24} />, count: "40+ products" }
   ];
 
   const suppliers = [
@@ -79,195 +83,132 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/5 via-white to-gray-50 py-20">
+      {/* Main Dashboard Section */}
+      <section className="py-12">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Fresh, <span className="text-primary">Organic</span> Products
-                <br />
-                From Local Farms
-              </h1>
-              <p className="text-xl text-secondary mb-8 leading-relaxed">
-                Connect directly with local farmers and suppliers to get the freshest, 
-                highest quality organic products delivered to your doorstep.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <Link to="/products" className="btn btn-primary btn-lg">
-                  Shop Now
-                  <ArrowRight size={20} />
-                </Link>
-                <Link to="/suppliers" className="btn btn-secondary btn-lg">
-                  Find Suppliers
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 gap-6 text-center">
-                <div>
-                  <div className="text-3xl font-bold text-primary mb-1">500+</div>
-                  <div className="text-sm text-secondary">Verified Suppliers</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-primary mb-1">10k+</div>
-                  <div className="text-sm text-secondary">Happy Customers</div>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 rounded-3xl flex items-center justify-center text-8xl">
-                🌱
-              </div>
-              <div className="absolute -top-4 -right-4 bg-white p-4 rounded-2xl shadow-xl">
-                <div className="flex items-center gap-2">
-                  <Star className="text-yellow-400 fill-current" size={16} />
-                  <span className="font-semibold text-sm">4.9 Rating</span>
-                </div>
-              </div>
-              <div className="absolute -bottom-4 -left-4 bg-white p-4 rounded-2xl shadow-xl">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="text-green-500" size={16} />
-                  <span className="font-semibold text-sm">100% Organic</span>
-                </div>
-              </div>
+          <div className="dashboard-header">
+            <h1 className="dashboard-title">Welcome to NaattuMarket</h1>
+            <div className="flex gap-3">
+              <button className="btn btn-primary">
+                Browse Products
+                <ArrowRight size={16} />
+              </button>
+              <button className="btn btn-secondary">
+                Find Suppliers
+              </button>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 bg-white">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Why Choose NattuMarket?</h2>
-            <p className="text-xl text-secondary max-w-2xl mx-auto">
-              We're committed to bringing you the best organic products while supporting local farmers and communities.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="card card-hover text-center">
-                <div className="p-8">
-                  <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-secondary">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Categories Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Shop by Category</h2>
-            <p className="text-xl text-secondary">
-              Explore our wide range of organic products
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {categories.map((category, index) => (
-              <Link
-                key={index}
-                to={`/products?category=${encodeURIComponent(category.name)}`}
-                className="card card-hover group"
-              >
-                <div className="p-8 text-center">
-                  <div className="text-5xl mb-4">{category.emoji}</div>
-                  <h3 className="text-xl font-semibold mb-2 group-hover:text-primary transition">
-                    {category.name}
-                  </h3>
-                  <p className="text-secondary">{category.count}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Top Suppliers Section */}
-      <section className="py-20 bg-white">
-        <div className="container">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Featured Suppliers</h2>
-            <p className="text-xl text-secondary">
-              Meet our top-rated suppliers and farmers
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {suppliers.map((supplier, index) => (
-              <div key={index} className="card card-hover">
-                <div className="p-8">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="bg-primary/10 w-16 h-16 rounded-2xl flex items-center justify-center text-2xl">
-                      🏪
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="text-yellow-400 fill-current" size={16} />
-                      <span className="font-semibold">{supplier.rating}</span>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2">{supplier.name}</h3>
-                  <div className="flex items-center gap-1 text-secondary mb-2">
-                    <MapPin size={16} />
-                    <span>{supplier.location}</span>
-                  </div>
-                  <p className="text-sm text-secondary mb-4">{supplier.specialty}</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-tertiary">{supplier.products} products</span>
-                    <Link to="/suppliers" className="text-primary hover:text-primary/80 font-medium">
-                      View Profile →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-12">
-            <Link to="/suppliers" className="btn btn-secondary">
-              View All Suppliers
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-20 bg-primary text-white">
-        <div className="container">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
+          
+          <div className="dashboard-stats mb-10">
             {stats.map((stat, index) => (
-              <div key={index}>
-                <div className="text-4xl font-bold mb-2">{stat.value}</div>
-                <div className="text-primary-100">{stat.label}</div>
+              <div key={index} className="dashboard-card text-center">
+                <h3 className="text-4xl font-bold text-primary mb-2">{stat.value}</h3>
+                <p className="text-secondary">{stat.label}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container">
-          <div className="card card-elevated max-w-4xl mx-auto text-center">
-            <div className="p-12">
-              <div className="text-6xl mb-8">🚀</div>
-              <h2 className="text-4xl font-bold mb-6">Ready to Start Shopping?</h2>
-              <p className="text-xl text-secondary mb-8 max-w-2xl mx-auto">
-                Join thousands of customers who trust NattuMarket for their organic product needs. 
-                Fresh, quality products delivered right to your door.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/products" className="btn btn-primary btn-lg">
-                  Browse Products
-                  <ArrowRight size={20} />
-                </Link>
-                <Link to="/auth" className="btn btn-secondary btn-lg">
-                  Create Account
+          
+          <div className="mb-10">
+            <div className="dashboard-card">
+              <div className="dashboard-card-header">
+                <h2 className="dashboard-card-title">Discover Fresh Organic Products</h2>
+                <Link to="/products" className="btn btn-ghost btn-sm">
+                  View all
+                  <ArrowRight size={14} />
                 </Link>
               </div>
+              <p className="text-secondary mb-6">
+                Connect directly with local farmers and suppliers 
+                for the freshest organic products delivered to your doorstep.
+              </p>
+              
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {features.map((feature, index) => (
+                  <div key={index} className="flex items-start p-4 rounded-md border border-light hover:border-main transition-all">
+                    <div className="mr-4 mt-1">{feature.icon}</div>
+                    <div>
+                      <h3 className="font-semibold mb-1">{feature.title}</h3>
+                      <p className="text-sm text-tertiary">{feature.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="grid lg:grid-cols-3 gap-6 mb-10">
+            <div className="lg:col-span-2">
+              <div className="dashboard-card h-full">
+                <div className="dashboard-card-header">
+                  <h2 className="dashboard-card-title">Featured Suppliers</h2>
+                  <Link to="/suppliers" className="btn btn-ghost btn-sm">
+                    All suppliers
+                    <ArrowRight size={14} />
+                  </Link>
+                </div>
+                <div className="grid gap-4">
+                  {suppliers.map((supplier, index) => (
+                    <div key={index} className="border border-light rounded-md p-4 hover:bg-hover transition-all">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-semibold">{supplier.name}</h3>
+                        <div className="flex items-center">
+                          <Star size={16} className="text-amber" />
+                          <span className="ml-1 text-sm font-medium">{supplier.rating}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-tertiary text-sm mt-1">
+                        <MapPin size={14} />
+                        <span>{supplier.location}</span>
+                      </div>
+                      <div className="text-sm mt-2">
+                        <span className="text-primary font-medium">{supplier.specialty}</span>
+                        <span className="text-tertiary ml-2">({supplier.products} products)</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="dashboard-card">
+              <div className="dashboard-card-header">
+                <h2 className="dashboard-card-title">Browse Categories</h2>
+              </div>
+              <div className="grid gap-3">
+                {categories.map((category, index) => (
+                  <Link key={index} to={`/products?category=${category.name}`} className="flex justify-between items-center p-3 rounded-md border border-light hover:border-main hover:bg-hover transition-all">
+                    <div className="flex items-center">
+                      <div className="p-2 bg-muted rounded-md mr-3">
+                        {category.icon}
+                      </div>
+                      <span className="font-medium">{category.name}</span>
+                    </div>
+                    <div className="text-sm text-tertiary">{category.count}</div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="dashboard-card">
+            <div className="dashboard-card-header">
+              <h2 className="dashboard-card-title">Ready to get started?</h2>
+            </div>
+            <p className="text-secondary mb-6">
+              Join thousands of customers who trust NaattuMarket for their organic product needs.
+              Get started with just a few clicks.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link to="/products" className="btn btn-primary">
+                Browse Products
+                <ArrowRight size={16} />
+              </Link>
+              <Link to="/suppliers" className="btn btn-secondary">
+                Meet Our Suppliers
+              </Link>
+              <Link to="/register" className="btn btn-secondary">
+                Create Account
+              </Link>
             </div>
           </div>
         </div>
