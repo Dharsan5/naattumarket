@@ -8,7 +8,7 @@ import SuppliersPage from './pages/SuppliersPage';
 import ProductsPage from './pages/ProductsPage';
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
-import LoginPage from './pages/LoginPage';
+import AuthPage from './pages/AuthPage';
 import './styles/main.css';
 
 function App() {
@@ -24,7 +24,8 @@ function App() {
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/login" element={<LoginPage />} />
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/signup" element={<AuthPage />} />
             </Routes>
           </main>
           

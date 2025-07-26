@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="0 0 500 500">
+  <defs>
+    <pattern id="leaf-pattern" patternUnits="userSpaceOnUse" width="50" height="50">
+      <path d="M25,0 C30,10 40,15 50,15 C40,25 40,40 50,50 C40,50 30,40 25,50 C20,40 10,50 0,50 C10,40 10,25 0,15 C10,15 20,10 25,0" fill="rgba(109, 143, 109, 0.05)" />
+    </pattern>
+  </defs>
+  <rect width="500" height="500" fill="url(#leaf-pattern)" />
+</svg>

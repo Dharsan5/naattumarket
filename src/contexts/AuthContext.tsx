@@ -83,12 +83,13 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 // Auth context
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: {
+  signup: (userData: {
     email: string;
     password: string;
     name: string;
     phone?: string;
-    role?: 'customer' | 'supplier';
+    isVendor?: boolean;
+    businessName?: string;
   }) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<boolean>;
@@ -153,21 +154,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Register function
-  const register = async (userData: {
+  // Signup function
+  const signup = async (userData: {
     email: string;
     password: string;
     name: string;
     phone?: string;
-    role?: 'customer' | 'supplier';
+    isVendor?: boolean;
+    businessName?: string;
   }): Promise<boolean> => {
     dispatch({ type: 'LOGIN_START' });
     
     try {
-      const response = await authService.register(userData);
+      // Convert isVendor to role for compatibility with backend
+      const role = userData.isVendor ? 'supplier' : 'customer';
+      const response = await authService.register({
+        ...userData,
+        role
+      });
       
       if (response.success && response.data) {
-        dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.user });
+        // For signup flow, we don't automatically log in the user
+        dispatch({ type: 'SET_LOADING', payload: false });
         return true;
       } else {
         dispatch({ type: 'LOGIN_FAILURE', payload: response.error || 'Registration failed' });
@@ -222,7 +230,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     ...state,
     login,
-    register,
+    signup,
     logout,
     updateProfile,
     clearError,
