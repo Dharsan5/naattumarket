@@ -1,96 +1,39 @@
-# React + TypeScript + Vite
+# NaattuMarket - Native Supply. Real Time.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-# NaattuMarket - Native Supply. Real Time. 🔥
-
-A real-time marketplace connecting street food vendors with local suppliers in Tamil Nadu, India. Built with modern web technologies and featuring a beautiful olive glass design theme.
+A real-time marketplace connecting street food vendors with local suppliers through instant chat, curated product kits, and location-based discovery.
 
 ## 🎯 Features
 
-### 🔴 **Real-time Live Chat with Suppliers**
-- Instant communication using Socket.IO
-- Tamil language quick phrases for low-literacy users
-- Message translation and typing indicators
-- Voice message support
+- **Real-time Chat**: Instant communication with suppliers using Socket.IO
+- **Naattu Kits**: Curated business starter kits (Tiffin, Tea Stall, Chaat)
+- **Local Discovery**: Location-based supplier matching
+- **Live Inventory**: Real-time stock updates
+- **Mobile-First**: Optimized for street vendors on mobile devices
+- **Glassmorphism UI**: Modern olive-themed design with glass effects
 
-### 🛒 **Naattu Kits & Dynamic Orders**
-- Curated supply packages: Tiffin Kit, Tea Stall Kit, Chaat Kit
-- Smart price calculation with real-time updates
-- "Buy Together" feature for bulk discounts
-- Custom kit builder
+## 🛠 Tech Stack
 
-### 🌍 **Local Supplier Discovery**
-- Location-based supplier matching
-- Verified supplier badges
-- Live inventory tracking
-- Real-time availability updates
+- **Frontend**: React + TypeScript + Vite
+- **Styling**: TailwindCSS with custom glassmorphism theme
+- **Real-time**: Socket.IO client
+- **Database**: Supabase (PostgreSQL + Auth)
+- **UI/UX**: Framer Motion + Lucide Icons
+- **Notifications**: React Hot Toast
 
-### 🧑‍🍳 **Simple UI for Low-Tech Users**
-- Tamil-first interface with i18n support
-- Icon-based navigation
-- Voice search capabilities
-- Quick action cards ("Reorder Yesterday")
-
-### 🧾 **Order Tracking & Alerts**
-- Real-time order status updates
-- WhatsApp/SMS integration
-- Admin dashboard for suppliers
-- Push notifications
-
-## 🎨 Design System - Minimal Olive Glass
-
-### Color Palette
-- **Background:** `#e5eadb` (soft olive white)
-- **Primary:** `#718355` (organic olive green)
-- **Glass Effect:** `backdrop-filter: blur(10px)` with `rgba(113, 131, 85, 0.1)`
-
-### Typography
-- **English:** Inter font family
-- **Tamil:** Noto Sans Tamil
-- Responsive font scaling
-
-### Components
-- Glassmorphism cards with subtle borders
-- Micro-interactions and animations
-- Glowing shadows and hover effects
-
-## 🚀 Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | React 19, TypeScript, TailwindCSS 4 |
-| **Real-time** | Socket.IO (vendor ↔ supplier chat, live stock) |
-| **Backend** | Express.js, Node.js |
-| **Database** | Supabase (PostgreSQL, Auth, Geo queries) |
-| **Authentication** | Supabase OTP (Phone number based) |
-| **Payments** | UPI integration (Razorpay/PhonePe SDK) |
-| **Internationalization** | react-i18next (Tamil-first) |
-| **Alerts** | Twilio/WhatsApp API |
-| **State Management** | React Context + useReducer |
-| **Routing** | React Router DOM 7 |
-| **Animations** | Framer Motion |
-| **Build Tool** | Vite |
-
-## 📦 Installation
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
-- (Optional) Socket.IO server
 
-### Setup
+- Node.js 18+
+- Supabase account
+- Socket.IO server (for real-time features)
+
+### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/nattumarket.git
-   cd nattumarket
+   git clone <repository-url>
+   cd naattu-market
    ```
 
 2. **Install dependencies**
@@ -98,202 +41,94 @@ A real-time marketplace connecting street food vendors with local suppliers in T
    npm install
    ```
 
-3. **Environment Configuration**
+3. **Setup environment variables**
    ```bash
    cp .env.example .env
    ```
    
-   Fill in your environment variables:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
+   Update `.env` with your Supabase credentials:
+   ```
+   VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   VITE_SOCKET_URL=http://localhost:3001
+   VITE_SOCKET_URL=ws://localhost:3001
    ```
 
-4. **Start the development server**
+4. **Start development server**
    ```bash
    npm run dev
    ```
 
-5. **Open your browser**
-   Navigate to `http://localhost:5173`
+## 🗄 Database Setup
 
-## 🏗️ Project Structure
+The app requires the following Supabase tables:
 
-```
-nattumarket/
-├── src/
-│   ├── components/          # Reusable UI components
-│   │   ├── layout/         # Layout components (Navigation, etc.)
-│   │   └── ui/             # Basic UI components
-│   ├── pages/              # Page components
-│   │   └── auth/           # Authentication pages
-│   ├── context/            # React Context providers
-│   ├── hooks/              # Custom React hooks
-│   ├── lib/                # External service configurations
-│   ├── types/              # TypeScript type definitions
-│   ├── utils/              # Utility functions
-│   └── i18n/               # Internationalization files
-├── public/                 # Static assets
-└── docs/                   # Documentation
-```
+- `vendors` - Vendor profiles and business info
+- `suppliers` - Supplier details and verification status
+- `products` - Product catalog with real-time stock
+- `naattu_kits` - Curated product bundles
+- `orders` - Order management and tracking
+- `messages` - Chat message storage
 
-## 🌐 Internationalization (i18n)
+Use the Supabase dashboard to create these tables or run the provided migration scripts.
 
-NaattuMarket is **Tamil-first** with English support:
+## 🎨 Design System
 
-- Primary language: Tamil (`ta`)
-- Secondary language: English (`en`)
-- Auto language detection
-- Persistent language preference
-- Context-aware translations
+### Color Palette
+- **Background**: `#e5eadb` (soft olive white)
+- **Primary**: `#718355` (organic olive green)
+- **Glassmorphism**: Transparent components with blur effects
 
-### Adding Translations
+### Components
+- **GlassCard**: Reusable glassmorphism container
+- **GlassButton**: Interactive button with hover effects
+- **Header**: Sticky navigation with location display
+- **BottomNav**: Mobile-friendly bottom navigation
 
-Edit `src/i18n/index.ts`:
+## 📱 Pages
 
-```typescript
-// Add new keys to both languages
-en: {
-  translation: {
-    newKey: 'English text'
-  }
-},
-ta: {
-  translation: {
-    newKey: 'தமிழ் உரை'
-  }
-}
-```
+1. **Home** - Dashboard with quick actions and recent orders
+2. **Suppliers** - Local supplier discovery with real-time status
+3. **Naattu Kits** - Curated business starter packages
+4. **Chat** - Real-time messaging with suppliers
+5. **Profile** - Vendor profile and business management
 
-## 🔌 API Integration
+## 🔌 Real-time Features
 
-### Supabase Setup
+- Live chat with typing indicators
+- Real-time stock updates
+- Order status notifications
+- Supplier online/offline status
 
-1. Create a new Supabase project
-2. Set up the database schema (see `docs/database-schema.sql`)
-3. Configure Row Level Security (RLS)
-4. Enable real-time subscriptions
+## 🌍 Localization Ready
 
-### Socket.IO Server
-
-The app expects a Socket.IO server for real-time features. Refer to the backend repository for setup instructions.
-
-## 📱 Mobile-First Design
-
-- Responsive design with mobile-first approach
-- Touch-friendly interactions
-- Optimized for low-end devices
-- Progressive Web App (PWA) ready
-
-## 🔒 Security Features
-
-- Row Level Security (RLS) with Supabase
-- Phone number OTP authentication
-- Input validation and sanitization
-- Rate limiting for API calls
-- Secure environment variable handling
-
-## 🧪 Testing
-
-```bash
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run E2E tests
-npm run test:e2e
-```
+- Built with React i18next structure
+- Tamil + English support planned
+- Voice search integration ready
 
 ## 🚀 Deployment
 
-### Production Build
+1. **Build the project**
+   ```bash
+   npm run build
+   ```
 
-```bash
-npm run build
-```
-
-### Deploy to Vercel
-
-```bash
-npm install -g vercel
-vercel
-```
-
-### Deploy to Netlify
-
-```bash
-npm run build
-# Upload dist/ folder to Netlify
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow TypeScript strict mode
-- Use functional components with hooks
-- Implement proper error boundaries
-- Add comprehensive TypeScript types
-- Write accessible markup (ARIA labels)
-- Optimize for performance (lazy loading, code splitting)
+2. **Deploy to your preferred platform**
+   - Vercel, Netlify, or similar
+   - Configure environment variables
+   - Setup Socket.IO server separately
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see LICENSE file for details
 
-## 🙏 Acknowledgments
+## 🤝 Contributing
 
-- Tamil language support inspired by local street food culture
-- Olive glass design inspired by South Indian aesthetics
-- Real-time features inspired by modern marketplace needs
-
-## 📞 Support
-
-For support and questions:
-- Email: support@nattumarket.com
-- WhatsApp: +91 XXXXX XXXXX
-- GitHub Issues: [Create an issue](https://github.com/yourusername/nattumarket/issues)
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
-**Built with ❤️ for Tamil Nadu's street food vendors**
-
-*நாட்டு சப்ளை. நேரடி நேரம்* 🇮🇳
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Built with ❤️ for Tamil Nadu's street food vendors

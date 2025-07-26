@@ -1,198 +1,76 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@300;400;500;600;700&display=swap');
-
-/* If using Tailwind, ensure your build tool supports these directives.
-   If not using Tailwind, remove these lines. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  * {
-    box-sizing: border-box;
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
   }
   
   body {
-    background-color: #e5eadb;
-    color: #2f3824;
-    font-family: 'Inter', system-ui, sans-serif;
-    min-height: 100vh;
-    background-image: 
-      radial-gradient(circle at 20% 80%, rgba(113, 131, 85, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(113, 131, 85, 0.05) 0%, transparent 50%);
+    @apply bg-olive-50 text-olive-900;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  * {
+    @apply border-olive-200;
   }
 }
 
 @layer components {
-  /* Glass Card Component */
-  .glass-card {
-    backdrop-filter: blur(10px);
-    background: rgba(113, 131, 85, 0.1);
-    border: 1px solid rgba(113, 131, 85, 0.2);
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px 0 rgba(113, 131, 85, 0.37);
+  .btn-primary {
+    @apply glass-button text-white font-medium px-4 py-2 rounded-lg;
   }
   
-  .glass-card-hover {
-    backdrop-filter: blur(10px);
-    background: rgba(113, 131, 85, 0.1);
-    border: 1px solid rgba(113, 131, 85, 0.2);
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px 0 rgba(113, 131, 85, 0.37);
-    transition: all 0.3s ease;
-  }
-  
-  .glass-card-hover:hover {
-    background: rgba(113, 131, 85, 0.2);
-    box-shadow: 0 0 10px rgba(113, 131, 85, 0.3);
-    transform: scale(1.02);
-  }
-  
-  /* Glass Button Component */
-  .glass-btn {
-    backdrop-filter: blur(10px);
-    background: rgba(113, 131, 85, 0.1);
-    border: 1px solid rgba(113, 131, 85, 0.2);
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px 0 rgba(113, 131, 85, 0.37);
-    padding: 0.75rem 1.5rem;
-    color: #475537;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    cursor: pointer;
-  }
-  
-  .glass-btn:hover {
-    background: #718355;
-    color: white;
-    box-shadow: 0 0 10px rgba(113, 131, 85, 0.3);
-  }
-  
-  .glass-btn:active {
-    transform: scale(0.95);
-  }
-  
-  .glass-btn-primary {
-    background: #718355;
-    color: white;
-    border: 1px solid #5a6b44;
-    backdrop-filter: blur(10px);
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px 0 rgba(113, 131, 85, 0.37);
-    padding: 0.75rem 1.5rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    cursor: pointer;
-  }
-  
-  .glass-btn-primary:hover {
-    background: #5a6b44;
-    box-shadow: 0 0 20px rgba(113, 131, 85, 0.5);
-  }
-  
-  /* Glass Input Component */
-  .glass-input {
-    backdrop-filter: blur(10px);
-    background: rgba(113, 131, 85, 0.1);
-    border: 1px solid rgba(113, 131, 85, 0.2);
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px 0 rgba(113, 131, 85, 0.37);
-    padding: 0.75rem 1rem;
-    color: #3a452c;
-    outline: none;
-    transition: all 0.3s ease;
-  }
-  
-  .glass-input::placeholder {
-    color: #9bb67d;
-  }
-  
-  .glass-input:focus {
-    outline: 2px solid #718355;
-    border-color: transparent;
-  }
-  
-  /* Navigation Glass */
-  .glass-nav {
-    backdrop-filter: blur(10px);
-    background: rgba(113, 131, 85, 0.1);
-    border: 1px solid rgba(113, 131, 85, 0.2);
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px 0 rgba(113, 131, 85, 0.37);
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    border-bottom: 1px solid rgba(113, 131, 85, 0.2);
-  }
-  
-  /* Tamil Text */
-  .text-tamil {
-    font-family: 'Noto Sans Tamil', sans-serif;
-  }
-  
-  /* Animations */
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-  
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-  }
-  
-  /* Typing Indicator */
-  .typing-dots {
-    display: flex;
-    gap: 0.25rem;
-  }
-  
-  .typing-dots span {
-    width: 0.5rem;
-    height: 0.5rem;
-    background-color: #718355;
-    border-radius: 50%;
-    animation: typing 1s ease-in-out infinite;
-  }
-  
-  .typing-dots span:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-  
-  .typing-dots span:nth-child(3) {
-    animation-delay: 0.4s;
-  }
-  
-  @keyframes typing {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  
-  /* Scrollbar Styling */
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(113, 131, 85, 0.3) transparent;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(113, 131, 85, 0.3);
-    border-radius: 3px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(113, 131, 85, 0.5);
+  .btn-secondary {
+    @apply glass-card text-olive-600 font-medium px-4 py-2 rounded-lg border border-olive-300;
   }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* Custom animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
   }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbars but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Focus styles */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  @apply outline-2 outline-offset-2 outline-olive-500;
+}
+
+/* Selection styles */
+::selection {
+  @apply bg-olive-600 text-white;
+}
+
+/* Placeholder styles */
+::placeholder {
+  @apply text-olive-400;
 }

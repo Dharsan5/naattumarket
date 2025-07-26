@@ -1,0 +1,89 @@
+/* Glassmorphism utilities */
+.glass-card {
+  backdrop-filter: blur(10px);
+  background: rgba(113, 131, 85, 0.1);
+  border: 1px solid rgba(113, 131, 85, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(113, 131, 85, 0.1);
+}
+
+.glass-strong {
+  backdrop-filter: blur(15px);
+  background: rgba(113, 131, 85, 0.15);
+  border: 1px solid rgba(113, 131, 85, 0.3);
+  box-shadow: 0 12px 48px 0 rgba(113, 131, 85, 0.15);
+}
+
+.glass-button {
+  backdrop-filter: blur(8px);
+  background: rgba(113, 131, 85, 0.2);
+  border: 1px solid rgba(113, 131, 85, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-button:hover {
+  background: rgba(113, 131, 85, 0.3);
+  box-shadow: 0 0 20px rgba(113, 131, 85, 0.4);
+  transform: translateY(-2px);
+}
+
+.glass-button:active {
+  transform: translateY(0);
+  box-shadow: 0 0 10px rgba(113, 131, 85, 0.3);
+}
+
+.noise-texture {
+  position: relative;
+}
+
+.noise-texture::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.03;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(113, 131, 85, 0.8) 1px, transparent 0);
+  background-size: 20px 20px;
+  pointer-events: none;
+}
+
+/* Metallic border effect */
+.metallic-border {
+  border-image: linear-gradient(45deg, 
+    rgba(113, 131, 85, 0.8), 
+    rgba(255, 255, 255, 0.6), 
+    rgba(113, 131, 85, 0.8)
+  ) 1;
+  border-width: 1px;
+  border-style: solid;
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(113, 131, 85, 0.1);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(113, 131, 85, 0.3);
+  border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(113, 131, 85, 0.5);
+}
+
+/* Glow effects */
+.glow-green {
+  box-shadow: 0 0 20px rgba(113, 131, 85, 0.4);
+}
+
+.glow-green-strong {
+  box-shadow: 0 0 30px rgba(113, 131, 85, 0.6);
+}
