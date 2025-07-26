@@ -9,13 +9,33 @@ import {
   Clock,
   Tag,
   ArrowRight,
-  MessageCircle
+  MessageCircle,
+  X
 } from 'lucide-react';
 import '../styles/cart.css';
 import OrderChat from '../components/OrderChat';
+import ChatButton from '../components/ChatButton';
 
 const CartPage: React.FC = () => {
   const [activeChat, setActiveChat] = useState<number | null>(null);
+  const [hasNewMessages, setHasNewMessages] = useState<{[key: number]: boolean}>({1: true, 2: true});
+  const [directChat, setDirectChat] = useState(false);
+  const [showGlobalChat, setShowGlobalChat] = useState(false);
+  
+  // Function to open chat directly with supplier
+  const openChatWithSupplier = (itemId: number) => {
+    setActiveChat(itemId);
+    setHasNewMessages(prev => ({...prev, [itemId]: false}));
+    setDirectChat(true);
+    setShowGlobalChat(false); // Close global chat if open
+  };
+  
+  // Function to open global chat
+  const openGlobalChat = () => {
+    setShowGlobalChat(true);
+    setDirectChat(false); // Close any direct chat if open
+    setActiveChat(null);
+  };
   
   const [cartItems, setCartItems] = useState([
     {
@@ -91,20 +111,12 @@ const CartPage: React.FC = () => {
         
         <div className="flex-1 cart-item-details">
           <h3 className="heading-metal heading-metal-sm mb-xs cart-item-name">{item.name}</h3>
-          <div className="flex items-center justify-between mb-sm">
-            <p className="text-metal text-sm flex items-center gap-1">
-              by {item.supplier}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setActiveChat(item.id);
-                }}
-                className="ml-2 p-1 hover:bg-primary-500/10 rounded-full"
-                title="Chat with supplier"
-              >
-                <MessageCircle size={14} className="text-metal-accent" />
-              </button>
-            </p>
+          <div className="flex items-center gap-2 mb-sm">
+            <span className="text-metal text-sm">by {item.supplier}</span>
+            <ChatButton
+              onClick={() => openChatWithSupplier(item.id)}
+              hasNewMessages={hasNewMessages[item.id]}
+            />
           </div>
           
           <div className="flex items-center justify-between">
@@ -169,24 +181,16 @@ const CartPage: React.FC = () => {
         <span className="badge-metal">{cartItems.length} items</span>
       </div>
 
-      {/* Chat modal overlay */}
-      {activeChat && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setActiveChat(null)}>
-          <div className="relative max-w-lg w-full" onClick={(e) => e.stopPropagation()}>
-            <button 
-              onClick={() => setActiveChat(null)} 
-              className="absolute -top-10 right-0 text-white hover:text-gray-300 p-2"
-              aria-label="Close chat"
-            >
-              <Trash2 size={20} />
-            </button>
-            <OrderChat 
-              orderId="ORD-123456"
-              supplierId={activeChat}
-              supplierName={cartItems.find(item => item.id === activeChat)?.supplier || "Supplier"}
-            />
-          </div>
-        </div>
+      {/* Direct Chat modal overlay - now using the enhanced OrderChat component */}
+      {activeChat && directChat && (
+        <OrderChat 
+          orderId="ORD-123456"
+          supplierId={activeChat}
+          supplierName={cartItems.find(item => item.id === activeChat)?.supplier || "Supplier"}
+          startOpen={true}
+          onClose={() => setActiveChat(null)}
+          minimizable={true}
+        />
       )}
 
       <div className="cart-container">
@@ -213,15 +217,15 @@ const CartPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="flex gap-md">
+              <div className="promo-form">
                 <input
                   type="text"
                   placeholder="Enter promo code"
                   value={promoCode}
                   onChange={(e) => setPromoCode(e.target.value)}
-                  className="input-metal flex-1"
+                  className="promo-input"
                 />
-                <button onClick={applyPromoCode} className="btn-metal btn-metal-primary">
+                <button onClick={applyPromoCode} className="promo-button">
                   Apply
                 </button>
               </div>
@@ -283,16 +287,37 @@ const CartPage: React.FC = () => {
             </div>
           </div>
 
-          <button className="checkout-button btn-metal-primary">
+          <button className="checkout-button">
             <ShoppingBag size={16} />
             Proceed to Checkout
           </button>
           
-          <button className="btn-metal w-full mt-3">
+          <button className="continue-shopping w-full mt-3">
             Continue Shopping
           </button>
         </div>
       </div>
+
+      {/* Floating chat button for global support */}
+      {!directChat && !showGlobalChat && (
+        <ChatButton
+          onClick={openGlobalChat}
+          hasNewMessages={Object.values(hasNewMessages).some(Boolean)}
+          type="floating"
+        />
+      )}
+
+      {/* Global chat modal */}
+      {showGlobalChat && (
+        <OrderChat 
+          orderId="SUPPORT"
+          supplierId={0}
+          supplierName="Customer Support"
+          startOpen={true}
+          onClose={() => setShowGlobalChat(false)}
+          minimizable={true}
+        />
+      )}
     </div>
   );
 };

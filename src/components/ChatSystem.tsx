@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Paperclip, MoreVertical, ArrowLeft, User } from 'lucide-react';
+import { Send, Paperclip, MoreVertical, X, User } from 'lucide-react';
 import '../styles/chat.css';
 
 interface Message {
@@ -28,8 +28,21 @@ const ChatSystem: React.FC<ChatProps> = ({ supplierId, supplierName, orderId, on
     // Simulate loading messages from an API
     setIsLoading(true);
     
-    // Sample conversation based on an order
-    const sampleMessages: Message[] = orderId ? [
+    // Sample conversation based on chat type
+    const sampleMessages: Message[] = orderId === 'SUPPORT' ? 
+      // Customer support chat
+      [
+        {
+          id: '1',
+          text: 'Hello! Welcome to Nattu Market customer support. How can I help you today?',
+          sender: 'supplier',
+          timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+          read: true,
+        }
+      ] 
+      : orderId ? 
+      // Order-specific conversation
+      [
       {
         id: '1',
         text: `Hello, I'm inquiring about order #${orderId}. When can I expect delivery?`,
@@ -83,7 +96,7 @@ const ChatSystem: React.FC<ChatProps> = ({ supplierId, supplierName, orderId, on
 
   // Auto scroll to bottom when messages change
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messageEndRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
   const handleSendMessage = () => {
@@ -145,32 +158,43 @@ const ChatSystem: React.FC<ChatProps> = ({ supplierId, supplierName, orderId, on
     }
   };
 
+  // No minimize functionality
+
   return (
-    <div className="chat-system metal-glass-card">
+    <div className="chat-system metal-glass-card chat-centered">
       {/* Chat Header */}
       <div className="chat-header">
-        <div className="flex items-center gap-2">
-          {onClose && (
-            <button onClick={onClose} className="btn-metal p-xs">
-              <ArrowLeft size={18} />
-            </button>
-          )}
-          
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-sage-silver to-sage-silver-dark flex items-center justify-center">
-            <User size={18} />
+        <div className="flex items-center flex-1 gap-3">
+          <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-md relative">
+            <User size={22} className="text-green-700" />
+            <span className="status-online absolute bottom-0 right-0 border-2 border-white"></span>
           </div>
           
-          <div>
-            <h3 className="heading-metal heading-metal-sm">{supplierName}</h3>
-            <p className="text-metal text-xs">
-              {orderId ? `Order #${orderId}` : 'General Inquiry'}
+          <div className="flex-1">
+            <h3 className="text-white font-bold text-lg text-shadow-strong">{supplierName}</h3>
+            <p className="text-white text-xs flex items-center gap-1 font-medium text-shadow-sm">
+              {orderId ? (
+                <>
+                  <span className="inline-block w-2 h-2 bg-white rounded-full shadow-glow"></span>
+                  Order #{orderId}
+                </>
+              ) : 'Online now'}
             </p>
           </div>
         </div>
         
-        <button className="btn-metal p-xs">
-          <MoreVertical size={18} />
-        </button>
+        <div className="flex gap-3 items-center">
+          {onClose && (
+            <button 
+              onClick={onClose} 
+              className="chat-header-button chat-header-button-close"
+              title="Close chat"
+              aria-label="Close chat"
+            >
+              <X size={20} />
+            </button>
+          )}
+        </div>
       </div>
       
       {/* Chat Messages */}
@@ -181,23 +205,46 @@ const ChatSystem: React.FC<ChatProps> = ({ supplierId, supplierName, orderId, on
           </div>
         ) : (
           <>
-            <div className="text-center my-4">
-              <span className="badge-metal text-xs">
-                {orderId ? `Conversation for Order #${orderId}` : 'New Conversation'}
+            <div className="chat-date-separator">
+              <span className="chat-date-text">
+                {orderId === 'SUPPORT' ? 'Customer Support' : 
+                  orderId ? `Order #${orderId} Conversation` : 'New Conversation'}
               </span>
             </div>
             
-            {messages.map((msg) => (
-              <div 
-                key={msg.id} 
-                className={`message ${msg.sender === 'vendor' ? 'message-outgoing' : 'message-incoming'}`}
-              >
-                <div className="message-content">
-                  <p>{msg.text}</p>
-                  <span className="message-time">{formatTime(msg.timestamp)}</span>
-                </div>
-              </div>
-            ))}
+            {messages.map((msg, index) => {
+              // Check if we need to add a date separator
+              const showDateSeparator = index > 0 && 
+                new Date(msg.timestamp).toDateString() !== 
+                new Date(messages[index-1].timestamp).toDateString();
+              
+              return (
+                <React.Fragment key={msg.id}>
+                  {showDateSeparator && (
+                    <div className="chat-date-separator">
+                      <span className="chat-date-text">
+                        {new Date(msg.timestamp).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                  <div 
+                    className={`message ${msg.sender === 'vendor' ? 'message-outgoing' : 'message-incoming'}`}
+                  >
+                    <div className="message-content">
+                      <p className="message-text">{msg.text}</p>
+                      <span className="message-time">{formatTime(msg.timestamp)}</span>
+                    </div>
+                    {msg.sender === 'vendor' && (
+                      <div className="message-status">
+                        <span className={`status-indicator ${msg.read ? 'status-read' : 'status-sent'}`}>
+                          {msg.read ? 'Read' : 'Sent'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </React.Fragment>
+              );
+            })}
             <div ref={messageEndRef} />
           </>
         )}
@@ -205,23 +252,26 @@ const ChatSystem: React.FC<ChatProps> = ({ supplierId, supplierName, orderId, on
       
       {/* Message Input */}
       <div className="chat-input">
-        <button className="btn-metal p-xs">
+        <button className="chat-action-button" title="Attach file">
           <Paperclip size={18} />
         </button>
         
         <textarea
-          placeholder="Type your message..."
+          placeholder="Type your message here..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={handleKeyPress}
           className="input-metal flex-1"
           rows={1}
+          autoFocus
         />
         
         <button 
           onClick={handleSendMessage}
           disabled={newMessage.trim() === ''}
-          className={`btn-metal ${newMessage.trim() !== '' ? 'btn-metal-primary' : ''} p-xs`}
+          className={`chat-action-button ${newMessage.trim() !== '' ? 'chat-send-button' : ''}`}
+          title="Send message"
+          aria-label="Send message"
         >
           <Send size={18} />
         </button>

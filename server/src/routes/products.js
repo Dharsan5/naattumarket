@@ -11,14 +11,7 @@ router.get('/', async (req, res) => {
     
     let query = supabase
       .from('products')
-      .select(`
-        *,
-        suppliers (
-          name,
-          location,
-          rating
-        )
-      `);
+      .select('*');
     
     // Filter by category
     if (category && category !== 'All') {
@@ -98,16 +91,7 @@ router.get('/:id', async (req, res) => {
     
     const { data: product, error } = await supabase
       .from('products')
-      .select(`
-        *,
-        suppliers (
-          name,
-          location,
-          rating,
-          phone,
-          email
-        )
-      `)
+      .select('*')
       .eq('id', req.params.id)
       .single();
     
