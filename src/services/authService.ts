@@ -42,24 +42,58 @@ export interface AuthResponse {
 export class AuthService {
   // Login user
   static async login(credentials: LoginCredentials): Promise<ApiResponse<AuthResponse>> {
-    const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
+    console.log('Attempting login with credentials:', { email: credentials.email });
     
-    if (response.success && response.data?.token) {
-      apiClient.setToken(response.data.token);
+    try {
+      const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
+      
+      console.log('Login response:', response);
+      
+      if (response.success && response.data?.token) {
+        console.log('Login successful, setting token');
+        apiClient.setToken(response.data.token);
+      } else {
+        console.error('Login failed:', response.error);
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Login failed due to network error' 
+      };
     }
-    
-    return response;
   }
 
   // Register user
   static async register(userData: RegisterData): Promise<ApiResponse<AuthResponse>> {
-    const response = await apiClient.post<AuthResponse>('/auth/register', userData);
+    console.log('Attempting registration with data:', { 
+      email: userData.email, 
+      name: userData.name,
+      role: userData.role
+    });
     
-    if (response.success && response.data?.token) {
-      apiClient.setToken(response.data.token);
+    try {
+      const response = await apiClient.post<AuthResponse>('/auth/register', userData);
+      
+      console.log('Registration response:', response);
+      
+      if (response.success && response.data?.token) {
+        console.log('Registration successful, setting token');
+        apiClient.setToken(response.data.token);
+      } else {
+        console.error('Registration failed:', response.error);
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Registration error:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Registration failed due to network error' 
+      };
     }
-    
-    return response;
   }
 
   // Logout user

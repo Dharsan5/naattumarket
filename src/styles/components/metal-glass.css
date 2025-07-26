@@ -1,0 +1,31 @@
+/* Metal Glass Card Styles */
+.metal-glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 10px 20px rgba(0, 0, 0, 0.05),
+    0 6px 6px rgba(0, 0, 0, 0.03),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.metal-glass-card:hover {
+  box-shadow: 
+    0 15px 25px rgba(0, 0, 0, 0.08),
+    0 8px 8px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+  transform: translateY(-2px);
+}
+
+/* Variables for Toaster */
+:root {
+  --glass-metal-medium: rgba(255, 255, 255, 0.95);
+  --border-primary: rgba(255, 255, 255, 0.3);
+  --shadow-metal-md: 
+    0 10px 20px rgba(0, 0, 0, 0.05),
+    0 6px 6px rgba(0, 0, 0, 0.03);
+  --radius-lg: 12px;
+}

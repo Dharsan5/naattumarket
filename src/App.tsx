@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import Navigation from './components/Navigation';
@@ -11,39 +11,49 @@ import ProfilePage from './pages/ProfilePage';
 import AuthPage from './pages/AuthPage';
 import './styles/main.css';
 
+// AppContent component to use hooks
+const AppContent = () => {
+  const location = useLocation();
+  // Show navigation on all pages
+  
+  return (
+    <div className="min-h-screen">
+      <Navigation />
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/suppliers" element={<SuppliersPage />} />
+          <Route path="/products" element={<ProductsPage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/login" element={<AuthPage />} />
+          <Route path="/signup" element={<AuthPage />} />
+        </Routes>
+      </main>
+      
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: 'var(--glass-metal-medium)',
+            color: 'var(--text-primary)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid var(--border-primary)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-metal-md)',
+          },
+        }}
+      />
+    </div>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen">
-          <Navigation />
-          <main>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/suppliers" element={<SuppliersPage />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/login" element={<AuthPage />} />
-              <Route path="/signup" element={<AuthPage />} />
-            </Routes>
-          </main>
-          
-          <Toaster
-            position="top-center"
-            toastOptions={{
-              duration: 3000,
-              style: {
-                background: 'var(--glass-metal-medium)',
-                color: 'var(--text-primary)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid var(--border-primary)',
-                borderRadius: 'var(--radius-lg)',
-                boxShadow: 'var(--shadow-metal-md)',
-              },
-            }}
-          />
-        </div>
+        <AppContent />
       </Router>
     </AuthProvider>
   );

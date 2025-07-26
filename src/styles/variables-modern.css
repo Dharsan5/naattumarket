@@ -25,6 +25,9 @@
   --violet: #7c3aed;
   --indigo: #4f46e5;
   --rose: #e11d48;
+  
+  /* Gradients */
+  --color-accent-gradient: linear-gradient(90deg, var(--teal), var(--olive-600));
 
   /* Professional Dashboard Colors */
   --primary: var(--olive-600);

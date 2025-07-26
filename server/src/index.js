@@ -25,8 +25,11 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    methods: ["GET", "POST"]
+    // Allow any origin in development
+    origin: '*',
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"]
   }
 });
 
@@ -41,11 +44,28 @@ const limiter = rateLimit({
 });
 
 // Middleware
-app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173",
-  credentials: true
+// Configure helmet with relaxed settings for development
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: false
 }));
+
+// Configure CORS - make it more permissive for development
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow any origin in development
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+  exposedHeaders: ['Content-Length', 'X-Requested-With'],
+  optionsSuccessStatus: 200,
+  credentials: true,
+  maxAge: 86400 // Cache preflight requests for 24 hours
+}));
+
+// CORS preflight options handling for all routes
+app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(limiter);
@@ -102,7 +122,8 @@ app.use('*', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// Force port 5000 in development to match frontend proxy config
+const PORT = process.env.NODE_ENV === 'production' ? (process.env.PORT || 80) : 5000;
 
 server.listen(PORT, () => {
   console.log(`🚀 NaattuMarket Server running on port ${PORT}`);

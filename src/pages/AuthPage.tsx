@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Mail, 
@@ -56,36 +56,58 @@ const AuthPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Update indicator position when tab changes
-  useEffect(() => {
-    updateIndicator();
-    window.addEventListener('resize', updateIndicator);
-    return () => window.removeEventListener('resize', updateIndicator);
-  }, [activeTab]);
-
-  // Set the tab indicator position
-  const updateIndicator = () => {
+  // Calculate and memoize the indicator style
+  const calculateIndicatorStyle = React.useCallback(() => {
     const activeRef = activeTab === 'login' ? loginTabRef : signupTabRef;
     if (activeRef.current) {
-      setIndicatorStyle({
+      return {
         width: `${activeRef.current.offsetWidth}px`,
-        left: `${activeRef.current.offsetLeft}px`
-      });
+        left: `${activeRef.current.offsetLeft}px`,
+        opacity: 1,
+      };
     }
-  };
+    return { opacity: 0 };
+  }, [activeTab, loginTabRef, signupTabRef]);
+  
+  // Update indicator position when tab changes
+  useEffect(() => {
+    // Use requestAnimationFrame instead of setTimeout for smoother rendering
+    const rafId = requestAnimationFrame(() => {
+      setIndicatorStyle(calculateIndicatorStyle());
+    });
+    
+    // Handle window resize events
+    const handleResize = () => {
+      // Debounce the resize handler with requestAnimationFrame
+      requestAnimationFrame(() => {
+        setIndicatorStyle(calculateIndicatorStyle());
+      });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [calculateIndicatorStyle, activeTab]);
+
+  // Removed updateIndicator function as it's now inline in the useEffect
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      const from = (location.state as any)?.from?.pathname || '/';
-      navigate(from, { replace: true });
+      // Always redirect to homepage after successful authentication
+      navigate('/', { replace: true });
     }
-  }, [isAuthenticated, navigate, location]);
+  }, [isAuthenticated, navigate]);
 
   // Clear errors when component mounts
   useEffect(() => {
+    // Only clear errors on mount, not on every render
     clearError();
-  }, [clearError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle login form submission
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -93,9 +115,14 @@ const AuthPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      await login(loginData.email, loginData.password);
-      toast.success('Successfully logged in!');
-      // Redirect will happen via the useEffect above
+      const success = await login(loginData.email, loginData.password);
+      if (success) {
+        toast.success('Successfully logged in!');
+        // Explicitly navigate to homepage after successful login
+        navigate('/', { replace: true });
+      } else {
+        toast.error('Failed to login. Please check your credentials.');
+      }
     } catch (err) {
       toast.error('Failed to login. Please check your credentials.');
     } finally {

@@ -1,5 +1,6 @@
 // API Configuration and base setup
-const API_BASE_URL = (import.meta as any).env.VITE_API_URL || 'http://localhost:5000/api';
+// Use relative URL to work with Vite's proxy
+const API_BASE_URL = (import.meta as any).env.VITE_API_URL || '/api';
 
 // API Response types
 export interface ApiResponse<T = any> {
@@ -36,6 +37,7 @@ export class ApiClient {
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       ...(options.headers as Record<string, string>),
     };
 
@@ -44,17 +46,33 @@ export class ApiClient {
     }
 
     try {
+      console.log(`Making API request to: ${url}`, { method: options.method });
+      
       const response = await fetch(url, {
         ...options,
         headers,
+        // Include credentials for cookies, needed for session-based auth
+        credentials: 'include',
       });
-
-      const data = await response.json();
-
+      
+      // For debugging CORS issues
       if (!response.ok) {
-        throw new Error(data.message || 'Request failed');
+        console.error(`API error: ${response.status} ${response.statusText}`);
+        
+        // Try to get error data as JSON
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || `Server error (${response.status})`;
+        } catch (err) {
+          errorMessage = `Server error (${response.status})`;
+        }
+        
+        throw new Error(errorMessage);
       }
-
+      
+      const data = await response.json();
+      
       return {
         success: true,
         data: data.data || data,
@@ -62,6 +80,16 @@ export class ApiClient {
       };
     } catch (error) {
       console.error('API Request failed:', error);
+      
+      // Check if it's a network error, which could indicate CORS issues
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.error('Network error - possible CORS issue or server not running');
+        return {
+          success: false,
+          error: 'Network error - server may be unavailable or CORS issue',
+        };
+      }
+      
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
