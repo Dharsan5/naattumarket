@@ -7,8 +7,8 @@ let socket: any = null;
 let isConnected = false;
 let userId: string | null = null;
 
-// API URL from environment
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// API URL from environment - use fixed value for development to prevent issues
+const API_URL = 'http://localhost:5000';
 
 // Event listeners
 const listeners: { [key: string]: Function[] } = {
@@ -23,18 +23,22 @@ const listeners: { [key: string]: Function[] } = {
 const SocketService = {
   // Initialize socket connection
   init: (token: string) => {
-    if (socket) return;
-    
-    userId = token;
-    
-    socket = io(API_URL, {
-      auth: {
-        token
-      },
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionAttempts: 5
-    });
+    try {
+      if (socket) return;
+      
+      userId = token;
+      
+      socket = io(API_URL, {
+        auth: {
+          token
+        },
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5
+      });
+    } catch (error) {
+      console.error('Error initializing socket:', error);
+    }
     
     // Socket event handlers
     socket.on('connect', () => {

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, Leaf, ArrowRight, Package, Users } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import Logo from '../components/Logo';
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -64,9 +65,7 @@ const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <div className="p-3 bg-primary/10 rounded-2xl">
-              <Leaf size={32} className="text-primary" />
-            </div>
+            <Logo size="xl" variant="default" showText={true} />
           </div>
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
           <p className="text-secondary">Sign in to your NattuMarket account</p>

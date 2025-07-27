@@ -2,32 +2,45 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Search, MapPin, Bell } from 'lucide-react';
 import { GlassCard } from '../ui/GlassCard';
+import Logo from '../Logo';
 
 interface HeaderProps {
   title?: string;
   showSearch?: boolean;
   showLocation?: boolean;
   showNotifications?: boolean;
+  showLogo?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   title = 'NaattuMarket',
   showSearch = true,
   showLocation = true,
-  showNotifications = true
+  showNotifications = true,
+  showLogo = true
 }) => {
   return (
     <div className="sticky top-0 z-40 p-4 pb-2">
       <GlassCard variant="strong" className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <motion.h1 
-            className="text-xl font-bold text-olive-700"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {title}
-          </motion.h1>
+          {showLogo ? (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Logo size="sm" showText={true} />
+            </motion.div>
+          ) : (
+            <motion.h1 
+              className="text-xl font-bold text-olive-700"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              {title}
+            </motion.h1>
+          )}
           
           {showLocation && (
             <motion.div 

@@ -14,6 +14,8 @@ import supplierRoutes from './routes/suppliers.js';
 import orderRoutes from './routes/orders.js';
 import userRoutes from './routes/users.js';
 import messageRoutes from './routes/messages.js';
+import vendorRoutes from './routes/vendors.js';
+import uploadRoutes from './routes/uploads.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -89,6 +91,8 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/vendors', vendorRoutes);
+app.use('/api/uploads', uploadRoutes);
 
   // Socket.IO connection handling
 io.on('connection', (socket) => {

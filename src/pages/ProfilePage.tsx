@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, 
   MapPin, 
@@ -14,21 +14,63 @@ import {
   LogOut,
   Edit,
   Star,
-  Clock
+  Clock,
+  Store,
+  ShoppingBag,
+  ListFilter,
+  BarChart,
+  FileText,
+  Gift,
+  Home,
+  HelpCircle,
+  Save
 } from 'lucide-react';
+import VendorTab from '../components/VendorTab';
+import VendorDashboard from '../components/VendorDashboard';
+import ProfileImageUploader from '../components/ProfileImageUploader';
+import { useAuth } from '../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const ProfilePage: React.FC = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
-
-  const user = {
-    name: "Priya Sharma",
-    email: "priya.sharma@email.com",
-    phone: "+91 98765 43210",
-    address: "123 Green Street, Coimbatore, Tamil Nadu 641001",
-    joinDate: "March 2023",
-    avatar: "👩",
-    verified: true
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: '',
+    phone: '',
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      postal_code: '',
+      country: ''
+    }
+  });
+  
+  // For address display/formatting
+  const getFormattedAddress = () => {
+    if (!user?.address) return 'No address provided';
+    
+    const { street, city, state, postal_code, country } = user.address;
+    return `${street}, ${city}, ${state} ${postal_code}, ${country}`;
   };
+  
+  // Initialize form data when user data is loaded
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        name: user.name || '',
+        phone: user.phone || '',
+        address: {
+          street: user.address?.street || '',
+          city: user.address?.city || '',
+          state: user.address?.state || '',
+          postal_code: user.address?.postal_code || '',
+          country: user.address?.country || ''
+        }
+      });
+    }
+  }, [user]);
 
   const orders = [
     {
@@ -83,6 +125,7 @@ const ProfilePage: React.FC = () => {
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
+    { id: 'vendor', label: 'Vendor Setup', icon: Store },
     { id: 'orders', label: 'Orders', icon: Package },
     { id: 'favorites', label: 'Favorites', icon: Heart },
     { id: 'settings', label: 'Settings', icon: Settings }
@@ -102,23 +145,31 @@ const ProfilePage: React.FC = () => {
       {/* Profile Header */}
       <div className="metal-glass-card">
         <div className="flex items-center gap-lg mb-lg">
-          <div className="w-20 h-20 bg-gradient-to-br from-sage-silver-light to-sage-silver rounded-full flex items-center justify-center text-4xl">
-            {user.avatar}
-          </div>
+          <ProfileImageUploader 
+            currentImageUrl={user?.avatar_url} 
+            onUploadSuccess={(url) => {
+              toast.success('Profile image updated!');
+            }}
+          />
           <div className="flex-1">
             <div className="flex items-center gap-sm mb-sm">
-              <h2 className="heading-metal heading-metal-lg">{user.name}</h2>
-              {user.verified && (
-                <Shield size={16} className="text-green-400" />
+              <h2 className="heading-metal heading-metal-lg">{user?.name}</h2>
+              {user?.role === 'supplier' && (
+                <div title="Verified Vendor">
+                  <Shield size={16} className="text-green-400" />
+                </div>
               )}
             </div>
-            <p className="text-metal mb-sm">Member since {user.joinDate}</p>
+            <p className="text-metal mb-sm">Member since {new Date(user?.created_at || '').toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</p>
             <div className="flex items-center gap-sm">
               <Star size={14} className="text-metal-accent fill-current" />
-              <span className="text-metal">Premium Member</span>
+              <span className="text-metal">{user?.role === 'supplier' ? 'Vendor' : 'Customer'}</span>
             </div>
           </div>
-          <button className="btn-metal">
+          <button 
+            className="btn-metal"
+            onClick={() => setIsEditingProfile(true)}
+          >
             <Edit size={16} />
             Edit Profile
           </button>
@@ -128,20 +179,133 @@ const ProfilePage: React.FC = () => {
       {/* Contact Info */}
       <div className="metal-glass-card">
         <h3 className="heading-metal heading-metal-md mb-lg">Contact Information</h3>
-        <div className="space-y-4">
-          <div className="flex items-center gap-sm">
-            <Mail size={16} className="text-metal-accent" />
-            <span className="text-metal">{user.email}</span>
+        {isEditingProfile ? (
+          <form className="space-y-4" onSubmit={(e) => {
+            e.preventDefault();
+            // Submit form logic will go here
+            setIsEditingProfile(false);
+            toast.success('Profile updated successfully');
+          }}>
+            <div className="form-group">
+              <label className="form-label">Full Name</label>
+              <input
+                type="text"
+                className="form-input"
+                value={profileForm.name}
+                onChange={(e) => setProfileForm({...profileForm, name: e.target.value})}
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Phone Number</label>
+              <input
+                type="tel"
+                className="form-input"
+                value={profileForm.phone}
+                onChange={(e) => setProfileForm({...profileForm, phone: e.target.value})}
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Street Address</label>
+              <input
+                type="text"
+                className="form-input"
+                value={profileForm.address.street}
+                onChange={(e) => setProfileForm({
+                  ...profileForm, 
+                  address: {...profileForm.address, street: e.target.value}
+                })}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="form-group">
+                <label className="form-label">City</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={profileForm.address.city}
+                  onChange={(e) => setProfileForm({
+                    ...profileForm, 
+                    address: {...profileForm.address, city: e.target.value}
+                  })}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">State/Province</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={profileForm.address.state}
+                  onChange={(e) => setProfileForm({
+                    ...profileForm, 
+                    address: {...profileForm.address, state: e.target.value}
+                  })}
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="form-group">
+                <label className="form-label">Postal Code</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={profileForm.address.postal_code}
+                  onChange={(e) => setProfileForm({
+                    ...profileForm, 
+                    address: {...profileForm.address, postal_code: e.target.value}
+                  })}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Country</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={profileForm.address.country}
+                  onChange={(e) => setProfileForm({
+                    ...profileForm, 
+                    address: {...profileForm.address, country: e.target.value}
+                  })}
+                />
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-4 mt-6">
+              <button 
+                type="button" 
+                className="btn-metal btn-outline"
+                onClick={() => setIsEditingProfile(false)}
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn-metal">
+                <Save size={16} />
+                Save Changes
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center gap-sm">
+              <Mail size={16} className="text-metal-accent" />
+              <span className="text-metal">{user?.email}</span>
+            </div>
+            <div className="flex items-center gap-sm">
+              <Phone size={16} className="text-metal-accent" />
+              <span className="text-metal">{user?.phone || 'No phone number added'}</span>
+            </div>
+            <div className="flex items-start gap-sm">
+              <MapPin size={16} className="text-metal-accent mt-1" />
+              <span className="text-metal">{getFormattedAddress()}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-sm">
-            <Phone size={16} className="text-metal-accent" />
-            <span className="text-metal">{user.phone}</span>
-          </div>
-          <div className="flex items-start gap-sm">
-            <MapPin size={16} className="text-metal-accent mt-1" />
-            <span className="text-metal">{user.address}</span>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Quick Stats */}
@@ -301,8 +465,15 @@ const ProfilePage: React.FC = () => {
   );
 
   const renderTabContent = () => {
+    // If user is a vendor and on vendor tab, show vendor dashboard
+    if (activeTab === 'vendor' && user?.role === 'supplier') {
+      return <VendorDashboard />;
+    }
+    
+    // Otherwise show regular tabs
     switch (activeTab) {
       case 'profile': return <ProfileTab />;
+      case 'vendor': return <VendorTab />; // Setup vendor tab for non-vendors
       case 'orders': return <OrdersTab />;
       case 'favorites': return <FavoritesTab />;
       case 'settings': return <SettingsTab />;

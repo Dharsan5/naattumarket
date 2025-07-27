@@ -88,11 +88,10 @@ interface AuthContextType extends AuthState {
     password: string;
     name: string;
     phone?: string;
-    isVendor?: boolean;
-    businessName?: string;
   }) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<boolean>;
+  updateProfileImage: (file: File) => Promise<boolean>;
   clearError: () => void;
 }
 
@@ -160,14 +159,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     password: string;
     name: string;
     phone?: string;
-    isVendor?: boolean;
-    businessName?: string;
   }): Promise<boolean> => {
     dispatch({ type: 'LOGIN_START' });
     
     try {
-      // Convert isVendor to role for compatibility with backend
-      const role = userData.isVendor ? 'supplier' : 'customer';
+      // All users register as customers by default
+      const role = 'customer';
       const response = await authService.register({
         ...userData,
         role
@@ -221,6 +218,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return false;
     }
   };
+  
+  // Update profile image function
+  const updateProfileImage = async (file: File): Promise<boolean> => {
+    try {
+      // Import here to avoid circular dependency
+      const { CloudinaryService } = await import('../services/cloudinaryService');
+      const response = await CloudinaryService.uploadProfileImage(file);
+      
+      if (response.success && response.data && state.user) {
+        // Update the user object with the new avatar URL
+        dispatch({ 
+          type: 'UPDATE_PROFILE', 
+          payload: { 
+            ...state.user, 
+            avatar_url: response.data.secure_url 
+          } 
+        });
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      console.error('Profile image update error:', error);
+      return false;
+    }
+  };
 
   // Clear error function
   const clearError = () => {
@@ -233,6 +256,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signup,
     logout,
     updateProfile,
+    updateProfileImage,
     clearError,
   };
 

@@ -6,7 +6,6 @@ import {
   Users, 
   ShoppingCart, 
   User,
-  Leaf,
   LogIn,
   LogOut,
   ShoppingBag,
@@ -15,6 +14,7 @@ import {
   Heart
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import Logo from './Logo';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
@@ -65,8 +65,7 @@ const Navigation: React.FC = () => {
       <div className="nav-container">
         {/* Brand */}
         <Link to="/" className="nav-brand">
-          <Leaf size={24} className="text-accent" />
-          <span>NaattuMarket</span>
+          <Logo size="md" showText={true} />
         </Link>
 
         {/* Main Navigation - Always visible */}

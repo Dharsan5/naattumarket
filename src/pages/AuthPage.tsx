@@ -19,6 +19,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import '../styles/auth.css';
+import Logo from '../components/Logo';
 
 const AuthPage: React.FC = () => {
   // State for tab switching between login and signup
@@ -40,8 +41,6 @@ const AuthPage: React.FC = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    isVendor: false,
-    businessName: '',
     agreeToTerms: false,
   });
 
@@ -154,8 +153,6 @@ const AuthPage: React.FC = () => {
         email: signupData.email,
         phone: signupData.phone,
         password: signupData.password,
-        isVendor: signupData.isVendor,
-        businessName: signupData.businessName,
       });
       toast.success('Account created successfully! Please login.');
       setActiveTab('login');
@@ -193,10 +190,7 @@ const AuthPage: React.FC = () => {
       <div className="auth-card metal-glass-card">
         <div className="auth-header">
           <div className="auth-logo">
-            <div className="auth-logo-icon">
-              <Leaf size={20} />
-            </div>
-            <h1 className="auth-title">NaattuMarket</h1>
+            <Logo size="xl" variant="default" showText={true} />
           </div>
           <p className="auth-subtitle">Natural products from trusted suppliers</p>
         </div>
@@ -383,41 +377,10 @@ const AuthPage: React.FC = () => {
                 </button>
               </div>
               
-              <div className="auth-checkbox-label mb-2">
-                <input
-                  type="checkbox"
-                  name="isVendor"
-                  className="auth-checkbox"
-                  checked={signupData.isVendor}
-                  onChange={handleSignupChange}
-                />
-                <span>I want to register as a vendor</span>
+              {/* Vendor selection moved to profile dashboard */}
+              <div className="auth-note">
+                <p>After signing up, you can set up your profile and choose to become a vendor from your profile dashboard.</p>
               </div>
-              
-              {signupData.isVendor && (
-                <div className="auth-input-group">
-                  <Building className="auth-input-icon" size={18} />
-                  <input
-                    type="text"
-                    name="businessName"
-                    placeholder="Business name"
-                    className="auth-input"
-                    value={signupData.businessName}
-                    onChange={handleSignupChange}
-                    required={signupData.isVendor}
-                  />
-                </div>
-              )}
-              
-              {signupData.isVendor && (
-                <div className="auth-vendor-info">
-                  <h3>Vendor Benefits:</h3>
-                  <p>As a vendor, you'll be able to list and sell your natural products to our community of health-conscious consumers.</p>
-                  <Link to="/vendor-info" className="auth-vendor-link">
-                    Learn more about becoming a vendor <ArrowRight size={14} />
-                  </Link>
-                </div>
-              )}
               
               <div className="auth-checkbox-label mt-4">
                 <input
