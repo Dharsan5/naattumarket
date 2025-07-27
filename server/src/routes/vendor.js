@@ -1,61 +1,66 @@
-const express = require('express');
+import express from 'express';
+import { authenticateUser, requireSupplier } from '../middleware/auth.js';
+import { getSupabase } from '../config/database.js';
+
 const router = express.Router();
-const { authenticateToken, authorizeRole } = require('../middleware/authMiddleware');
-const pool = require('../db');
 
 // Get vendor dashboard stats
-router.get('/stats', authenticateToken, authorizeRole(['supplier']), async (req, res) => {
+router.get('/stats', authenticateUser, requireSupplier, async (req, res) => {
   try {
     const userId = req.user.id;
+    const supabase = getSupabase();
     
-    const statsQuery = `
-      SELECT * FROM vendor_stats WHERE vendor_id = $1
-    `;
+    // Get vendor stats (simplified for now)
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true })
+      .eq('supplier_id', userId);
     
-    const statsResult = await pool.query(statsQuery, [userId]);
+    const { data: orders, error: ordersError } = await supabase
+      .from('orders')
+      .select('*', { count: 'exact', head: true })
+      .eq('supplier_id', userId);
     
     // Get recent orders (last 10)
-    const recentOrdersQuery = `
-      SELECT o.id, o.status, o.total_amount, o.created_at, 
-             json_build_object('id', u.id, 'name', u.name, 'email', u.email) as customer
-      FROM orders o
-      JOIN users u ON u.id = o.user_id
-      WHERE o.id IN (
-        SELECT DISTINCT order_id 
-        FROM order_items 
-        WHERE supplier_id = $1
-      )
-      ORDER BY o.created_at DESC
-      LIMIT 10
-    `;
+    const { data: recentOrders, error: recentOrdersError } = await supabase
+      .from('orders')
+      .select(`
+        id,
+        status,
+        total_amount,
+        created_at,
+        customer:users!orders_user_id_fkey(id, name, email)
+      `)
+      .eq('supplier_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(10);
     
-    const recentOrdersResult = await pool.query(recentOrdersQuery, [userId]);
+    // Get top products (simplified)
+    const { data: topProducts, error: topProductsError } = await supabase
+      .from('products')
+      .select('id, name, price, avg_rating')
+      .eq('supplier_id', userId)
+      .order('avg_rating', { ascending: false })
+      .limit(5);
     
-    // Get top products
-    const topProductsQuery = `
-      SELECT p.id, p.name, p.price, 
-             COALESCE(SUM(oi.quantity), 0) as total_sold,
-             COALESCE(p.avg_rating, 0) as rating
-      FROM products p
-      LEFT JOIN order_items oi ON p.id = oi.product_id
-      WHERE p.supplier_id = $1
-      GROUP BY p.id, p.name, p.price, p.avg_rating
-      ORDER BY total_sold DESC
-      LIMIT 5
-    `;
+    // Calculate total revenue
+    const { data: allOrders, error: revenueError } = await supabase
+      .from('orders')
+      .select('total_amount')
+      .eq('supplier_id', userId);
     
-    const topProductsResult = await pool.query(topProductsQuery, [userId]);
+    const totalRevenue = allOrders?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
     
     // Construct the response
     const dashboardData = {
-      stats: statsResult.rows[0] || {
-        total_products: 0,
-        total_orders: 0,
-        total_revenue: 0,
-        avg_rating: 0
+      stats: {
+        total_products: products || 0,
+        total_orders: orders || 0,
+        total_revenue: totalRevenue,
+        avg_rating: 0 // Will be calculated from products
       },
-      recentOrders: recentOrdersResult.rows,
-      topProducts: topProductsResult.rows
+      recentOrders: recentOrders || [],
+      topProducts: topProducts || []
     };
     
     res.json(dashboardData);
@@ -66,24 +71,23 @@ router.get('/stats', authenticateToken, authorizeRole(['supplier']), async (req,
 });
 
 // Get vendor products
-router.get('/products', authenticateToken, authorizeRole(['supplier']), async (req, res) => {
+router.get('/products', authenticateUser, requireSupplier, async (req, res) => {
   try {
     const userId = req.user.id;
+    const supabase = getSupabase();
     
-    const query = `
-      SELECT p.*, 
-             json_build_object('id', pc.id, 'name', pc.name) as category_data,
-             json_build_object('id', ps.id, 'name', ps.name) as subcategory_data
-      FROM products p
-      LEFT JOIN product_categories pc ON p.category = pc.name
-      LEFT JOIN product_subcategories ps ON p.subcategory = ps.name
-      WHERE p.supplier_id = $1
-      ORDER BY p.created_at DESC
-    `;
+    const { data: products, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('supplier_id', userId)
+      .order('created_at', { ascending: false });
     
-    const result = await pool.query(query, [userId]);
+    if (error) {
+      console.error('Error fetching vendor products:', error);
+      return res.status(500).json({ message: 'Server error while fetching products' });
+    }
     
-    res.json(result.rows);
+    res.json(products || []);
   } catch (error) {
     console.error('Error fetching vendor products:', error);
     res.status(500).json({ message: 'Server error while fetching products' });
@@ -91,9 +95,7 @@ router.get('/products', authenticateToken, authorizeRole(['supplier']), async (r
 });
 
 // Create new product
-router.post('/products', authenticateToken, authorizeRole(['supplier']), async (req, res) => {
-  const client = await pool.connect();
-  
+router.post('/products', authenticateUser, requireSupplier, async (req, res) => {
   try {
     const {
       name,
@@ -108,77 +110,40 @@ router.post('/products', authenticateToken, authorizeRole(['supplier']), async (
     } = req.body;
     
     const supplierId = req.user.id;
-    
-    // Start transaction
-    await client.query('BEGIN');
-    
-    // Check if category exists
-    const categoryCheck = await client.query(
-      'SELECT id FROM product_categories WHERE name = $1',
-      [category]
-    );
-    
-    if (categoryCheck.rows.length === 0) {
-      // Create new category if it doesn't exist
-      await client.query(
-        'INSERT INTO product_categories (name) VALUES ($1)',
-        [category]
-      );
-    }
-    
-    // Check if subcategory exists
-    if (subcategory) {
-      const categoryId = categoryCheck.rows[0]?.id || 
-                         (await client.query('SELECT id FROM product_categories WHERE name = $1', [category])).rows[0].id;
-                         
-      const subcategoryCheck = await client.query(
-        'SELECT id FROM product_subcategories WHERE category_id = $1 AND name = $2',
-        [categoryId, subcategory]
-      );
-      
-      if (subcategoryCheck.rows.length === 0) {
-        // Create new subcategory if it doesn't exist
-        await client.query(
-          'INSERT INTO product_subcategories (category_id, name) VALUES ($1, $2)',
-          [categoryId, subcategory]
-        );
-      }
-    }
+    const supabase = getSupabase();
     
     // Create the product
-    const insertProductQuery = `
-      INSERT INTO products (
-        supplier_id, name, description, price, discount_price,
-        stock_quantity, category, subcategory, images, is_organic
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      RETURNING *
-    `;
+    const { data: product, error } = await supabase
+      .from('products')
+      .insert({
+        supplier_id: supplierId,
+        name,
+        description,
+        price,
+        discount_price: discount_price || null,
+        stock_quantity,
+        category,
+        subcategory: subcategory || null,
+        images: images || [],
+        is_organic: is_organic || false
+      })
+      .select()
+      .single();
     
-    const productValues = [
-      supplierId, name, description, price, discount_price || null,
-      stock_quantity, category, subcategory || null, 
-      JSON.stringify(images || []), is_organic || false
-    ];
+    if (error) {
+      console.error('Error creating product:', error);
+      return res.status(500).json({ message: 'Server error while creating product' });
+    }
     
-    const result = await client.query(insertProductQuery, productValues);
-    
-    // Commit transaction
-    await client.query('COMMIT');
-    
-    res.status(201).json(result.rows[0]);
+    res.status(201).json(product);
   } catch (error) {
-    // Rollback in case of error
-    await client.query('ROLLBACK');
     console.error('Error creating product:', error);
     res.status(500).json({ message: 'Server error while creating product' });
-  } finally {
-    client.release();
   }
 });
 
 // Update product
-router.put('/products/:id', authenticateToken, authorizeRole(['supplier']), async (req, res) => {
+router.put('/products/:id', authenticateUser, requireSupplier, async (req, res) => {
   const client = await pool.connect();
   
   try {
@@ -279,7 +244,7 @@ router.put('/products/:id', authenticateToken, authorizeRole(['supplier']), asyn
 });
 
 // Delete product
-router.delete('/products/:id', authenticateToken, authorizeRole(['supplier']), async (req, res) => {
+router.delete('/products/:id', authenticateUser, requireSupplier, async (req, res) => {
   try {
     const productId = req.params.id;
     const supplierId = req.user.id;
@@ -308,7 +273,7 @@ router.delete('/products/:id', authenticateToken, authorizeRole(['supplier']), a
 });
 
 // Get vendor orders
-router.get('/orders', authenticateToken, authorizeRole(['supplier']), async (req, res) => {
+router.get('/orders', authenticateUser, requireSupplier, async (req, res) => {
   try {
     const userId = req.user.id;
     
@@ -355,7 +320,7 @@ router.get('/orders', authenticateToken, authorizeRole(['supplier']), async (req
 });
 
 // Get order details
-router.get('/orders/:id', authenticateToken, authorizeRole(['supplier']), async (req, res) => {
+router.get('/orders/:id', authenticateUser, requireSupplier, async (req, res) => {
   try {
     const orderId = req.params.id;
     const userId = req.user.id;
@@ -421,7 +386,7 @@ router.get('/orders/:id', authenticateToken, authorizeRole(['supplier']), async 
 });
 
 // Get product categories
-router.get('/categories', authenticateToken, async (req, res) => {
+router.get('/categories', authenticateUser, async (req, res) => {
   try {
     const query = `
       SELECT pc.*, 
@@ -445,4 +410,4 @@ router.get('/categories', authenticateToken, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

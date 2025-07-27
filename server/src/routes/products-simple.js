@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express';
+import { getSupabase } from '../config/database.js';
+
 const router = express.Router();
-const { authenticateToken } = require('../middleware/authMiddleware');
-const pool = require('../db');
 
 // Get all products with pagination
 router.get('/', async (req, res) => {
@@ -10,27 +10,40 @@ router.get('/', async (req, res) => {
     const limit = parseInt(req.query.limit) || 12;
     const offset = (page - 1) * limit;
     
-    const countQuery = 'SELECT COUNT(*) FROM products';
-    const countResult = await pool.query(countQuery);
-    const total = parseInt(countResult.rows[0].count);
+    const supabase = getSupabase();
     
-    const query = `
-      SELECT p.*, json_build_object('id', u.id, 'name', u.name) as supplier
-      FROM products p
-      JOIN users u ON p.supplier_id = u.id
-      ORDER BY p.created_at DESC
-      LIMIT $1 OFFSET $2
-    `;
+    // Get total count
+    const { count: total, error: countError } = await supabase
+      .from('products')
+      .select('*', { count: 'exact', head: true });
     
-    const result = await pool.query(query, [limit, offset]);
+    if (countError) {
+      console.error('Error counting products:', countError);
+      return res.status(500).json({ message: 'Server error while fetching products' });
+    }
+    
+    // Get products with supplier info
+    const { data: products, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        supplier:users!products_supplier_id_fkey(id, name)
+      `)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    if (error) {
+      console.error('Error fetching products:', error);
+      return res.status(500).json({ message: 'Server error while fetching products' });
+    }
     
     res.json({
-      products: result.rows,
+      products: products || [],
       pagination: {
-        total,
+        total: total || 0,
         page,
         limit,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil((total || 0) / limit)
       }
     });
   } catch (error) {
@@ -42,17 +55,24 @@ router.get('/', async (req, res) => {
 // Get featured products
 router.get('/featured', async (req, res) => {
   try {
-    const query = `
-      SELECT p.*, json_build_object('id', u.id, 'name', u.name) as supplier
-      FROM products p
-      JOIN users u ON p.supplier_id = u.id
-      WHERE p.is_featured = true
-      ORDER BY p.created_at DESC
-      LIMIT 8
-    `;
+    const supabase = getSupabase();
     
-    const result = await pool.query(query);
-    res.json(result.rows);
+    const { data: products, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        supplier:users!products_supplier_id_fkey(id, name)
+      `)
+      .eq('is_featured', true)
+      .order('created_at', { ascending: false })
+      .limit(8);
+    
+    if (error) {
+      console.error('Error fetching featured products:', error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+    
+    res.json(products || []);
   } catch (error) {
     console.error('Error fetching featured products:', error);
     res.status(500).json({ message: 'Server error' });
@@ -64,25 +84,26 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
-    const query = `
-      SELECT p.*, 
-             json_build_object('id', u.id, 'name', u.name) as supplier
-      FROM products p
-      JOIN users u ON p.supplier_id = u.id
-      WHERE p.id = $1
-    `;
+    const supabase = getSupabase();
     
-    const result = await pool.query(query, [id]);
+    const { data: product, error } = await supabase
+      .from('products')
+      .select(`
+        *,
+        supplier:users!products_supplier_id_fkey(id, name)
+      `)
+      .eq('id', id)
+      .single();
     
-    if (result.rows.length === 0) {
+    if (error || !product) {
       return res.status(404).json({ message: 'Product not found' });
     }
     
-    res.json(result.rows[0]);
+    res.json(product);
   } catch (error) {
     console.error('Error fetching product details:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-module.exports = router;
+export default router;

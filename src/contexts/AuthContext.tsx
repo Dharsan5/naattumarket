@@ -91,11 +91,13 @@ interface AuthContextType extends AuthState {
   }) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<boolean>;
-  updateProfileImage: (file: File) => Promise<boolean>;
+  updateProfileImage: (imageUrl: string) => Promise<boolean>;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export { AuthContext };
 
 // Auth provider component
 interface AuthProviderProps {
@@ -220,11 +222,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
   
   // Update profile image function
-  const updateProfileImage = async (file: File): Promise<boolean> => {
+  const updateProfileImage = async (imageUrl: string): Promise<boolean> => {
     try {
       // Import here to avoid circular dependency
-      const { CloudinaryService } = await import('../services/cloudinaryService');
-      const response = await CloudinaryService.uploadProfileImage(file);
+      const { imageService } = await import('../services/cloudinaryService');
+      const response = await imageService.uploadProfileImage(imageUrl);
       
       if (response.success && response.data && state.user) {
         // Update the user object with the new avatar URL

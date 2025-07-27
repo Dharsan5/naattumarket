@@ -12,7 +12,8 @@ import {
   ShoppingBag,
   Settings,
   Layers,
-  Heart
+  Heart,
+  MapPin
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -46,6 +47,11 @@ const Navigation: React.FC = () => {
       name: "Suppliers",
       path: "/suppliers",
       icon: <Users size={18} />
+    },
+    {
+      name: "Map",
+      path: "/map",
+      icon: <MapPin size={18} />
     },
     {
       name: "Cart",

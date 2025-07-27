@@ -141,3 +141,4 @@ const SocketService = {
 };
 
 export default SocketService;
+export { SocketService as socketService };

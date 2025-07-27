@@ -37,13 +37,13 @@ const SuppliersPage: React.FC = () => {
       if (response.success && response.data) {
         setSuppliers(response.data.suppliers);
       } else {
-        setSuppliers(mockSuppliers);
+        setSuppliers([]); // Clear suppliers on error
         if (response.error) {
           toast.error(response.error);
         }
       }
     } catch (err) {
-      setSuppliers(mockSuppliers);
+      setSuppliers([]); // Clear suppliers on error
       setError('Failed to load suppliers. Showing demo data.');
       console.error('Supplier fetch error:', err);
     } finally {
@@ -59,104 +59,6 @@ const SuppliersPage: React.FC = () => {
       page: 1
     }));
   };
-
-  const mockSuppliers: Supplier[] = [
-    {
-      id: "1",
-      name: "Green Valley Farms",
-      email: "contact@greenvalley.com",
-      phone: "+91 9876543210",
-      business_type: "Farm",
-      rating: 4.9,
-      reviews_count: 156,
-      description: "Family-owned organic farm specializing in premium spices and herbs",
-      location: {
-        address: "Mysore Road, Bangalore",
-        city: "Bangalore",
-        state: "Karnataka",
-        postal_code: "560059"
-      },
-      verified: true,
-      created_at: "2020-01-15T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "2",
-      name: "Nature's Best Organic",
-      email: "info@naturesbest.com",
-      phone: "+91 9876543211",
-      business_type: "Processor",
-      rating: 4.8,
-      reviews_count: 203,
-      description: "Leading processor of coconut-based products and traditional spices",
-      location: {
-        address: "Cochin Industrial Area",
-        city: "Kochi",
-        state: "Kerala",
-        postal_code: "682030"
-      },
-      verified: true,
-      created_at: "2019-03-20T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "3",
-      name: "Coastal Farms Collective",
-      email: "hello@coastalfarms.com",
-      phone: "+91 9876543212",
-      business_type: "Cooperative",
-      rating: 4.7,
-      reviews_count: 89,
-      description: "Farmer collective promoting sustainable coastal agriculture",
-      location: {
-        address: "ECR Main Road, Mahabalipuram",
-        city: "Chennai",
-        state: "Tamil Nadu",
-        postal_code: "603104"
-      },
-      verified: true,
-      created_at: "2021-06-10T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "4",
-      name: "Spice Masters Ltd",
-      email: "orders@spicemasters.com",
-      phone: "+91 9876543213",
-      business_type: "Trader",
-      rating: 4.6,
-      reviews_count: 124,
-      description: "Three generations of spice trading expertise",
-      location: {
-        address: "Spice Market, Old City",
-        city: "Hyderabad",
-        state: "Telangana",
-        postal_code: "500002"
-      },
-      verified: true,
-      created_at: "2018-11-05T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "5",
-      name: "Rice Valley Exports",
-      email: "export@ricevalley.com",
-      phone: "+91 9876543214",
-      business_type: "Exporter",
-      rating: 4.5,
-      reviews_count: 78,
-      description: "Premium rice exporter with focus on heritage varieties",
-      location: {
-        address: "Industrial Estate, Thanjavur",
-        city: "Thanjavur",
-        state: "Tamil Nadu",
-        postal_code: "613005"
-      },
-      verified: false,
-      created_at: "2022-02-28T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    }
-  ];
 
   const SupplierCard: React.FC<{ supplier: Supplier }> = ({ supplier }) => (
     <div className="card card-elevated group">

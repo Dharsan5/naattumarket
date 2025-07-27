@@ -1,17 +1,18 @@
-const express = require('express');
+import express from 'express';
+import { authenticateUser } from '../middleware/auth.js';
+import { getSupabase } from '../config/database.js';
+
 const router = express.Router();
-const { authenticateToken } = require('../middleware/auth');
-const pool = require('../db');
 
 /**
  * @route GET /api/vendors/profile
  * @desc Get vendor profile for authenticated user
  * @access Private
  */
-router.get('/profile', authenticateToken, async (req, res) => {
+router.get('/profile', authenticateUser, async (req, res) => {
   try {
     // Ensure the user is authorized to access vendor profile
-    if (req.user.role !== 'supplier') {
+    if (!req.userProfile || req.userProfile.user_type !== 'supplier') {
       return res.status(403).json({ 
         success: false, 
         error: 'You do not have permission to access vendor profile' 
@@ -19,19 +20,20 @@ router.get('/profile', authenticateToken, async (req, res) => {
     }
 
     // Get vendor profile from database
-    const vendorResult = await pool.query(
-      `SELECT 
-        business_name as "businessName", 
-        business_description as "businessDescription",
-        business_category as "businessCategory", 
-        business_phone as "businessPhone",
-        business_address as "businessAddress"
-      FROM suppliers
-      WHERE user_id = $1`,
-      [req.user.id]
-    );
+    const supabase = getSupabase();
+    const { data: vendorProfile, error } = await supabase
+      .from('suppliers')
+      .select(`
+        business_name,
+        business_description,
+        business_category,
+        business_phone,
+        business_address
+      `)
+      .eq('user_id', req.user.id)
+      .single();
 
-    if (vendorResult.rows.length === 0) {
+    if (error || !vendorProfile) {
       return res.status(404).json({ 
         success: false, 
         error: 'Vendor profile not found' 
@@ -40,7 +42,13 @@ router.get('/profile', authenticateToken, async (req, res) => {
 
     res.json({ 
       success: true, 
-      data: vendorResult.rows[0]
+      data: {
+        businessName: vendorProfile.business_name,
+        businessDescription: vendorProfile.business_description,
+        businessCategory: vendorProfile.business_category,
+        businessPhone: vendorProfile.business_phone,
+        businessAddress: vendorProfile.business_address
+      }
     });
   } catch (error) {
     console.error('Get vendor profile error:', error);
@@ -56,10 +64,10 @@ router.get('/profile', authenticateToken, async (req, res) => {
  * @desc Update vendor profile for authenticated user
  * @access Private
  */
-router.put('/profile', authenticateToken, async (req, res) => {
+router.put('/profile', authenticateUser, async (req, res) => {
   try {
     // Ensure the user is authorized to update vendor profile
-    if (req.user.role !== 'supplier') {
+    if (!req.userProfile || req.userProfile.user_type !== 'supplier') {
       return res.status(403).json({ 
         success: false, 
         error: 'You do not have permission to update vendor profile' 
@@ -74,33 +82,62 @@ router.put('/profile', authenticateToken, async (req, res) => {
       businessAddress 
     } = req.body;
 
-    // Check if vendor profile exists
-    const existingVendor = await pool.query(
-      'SELECT * FROM suppliers WHERE user_id = $1',
-      [req.user.id]
-    );
+    // Check if vendor profile exists and update/create accordingly
+    const supabase = getSupabase();
+    const { data: existingVendor, error: checkError } = await supabase
+      .from('suppliers')
+      .select('*')
+      .eq('user_id', req.user.id)
+      .single();
 
-    if (existingVendor.rows.length === 0) {
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking vendor profile:', checkError);
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Server error while checking vendor profile' 
+      });
+    }
+
+    if (!existingVendor) {
       // Create new vendor profile if it doesn't exist
-      await pool.query(
-        `INSERT INTO suppliers 
-          (user_id, business_name, business_description, business_category, business_phone, business_address)
-        VALUES ($1, $2, $3, $4, $5, $6)`,
-        [req.user.id, businessName, businessDescription, businessCategory, businessPhone, businessAddress]
-      );
+      const { error: insertError } = await supabase
+        .from('suppliers')
+        .insert({
+          user_id: req.user.id,
+          business_name: businessName,
+          business_description: businessDescription,
+          business_category: businessCategory,
+          business_phone: businessPhone,
+          business_address: businessAddress
+        });
+
+      if (insertError) {
+        console.error('Error creating vendor profile:', insertError);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'Server error while creating vendor profile' 
+        });
+      }
     } else {
       // Update existing vendor profile
-      await pool.query(
-        `UPDATE suppliers 
-        SET 
-          business_name = $1, 
-          business_description = $2,
-          business_category = $3,
-          business_phone = $4,
-          business_address = $5
-        WHERE user_id = $6`,
-        [businessName, businessDescription, businessCategory, businessPhone, businessAddress, req.user.id]
-      );
+      const { error: updateError } = await supabase
+        .from('suppliers')
+        .update({
+          business_name: businessName,
+          business_description: businessDescription,
+          business_category: businessCategory,
+          business_phone: businessPhone,
+          business_address: businessAddress
+        })
+        .eq('user_id', req.user.id);
+
+      if (updateError) {
+        console.error('Error updating vendor profile:', updateError);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'Server error while updating vendor profile' 
+        });
+      }
     }
 
     res.json({ 
@@ -121,7 +158,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
  * @desc Register as a vendor (convert user to supplier role)
  * @access Private
  */
-router.post('/register', authenticateToken, async (req, res) => {
+router.post('/register', authenticateUser, async (req, res) => {
   try {
     const { 
       businessName,
@@ -180,4 +217,4 @@ router.post('/register', authenticateToken, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,145 +1,189 @@
-const express = require('express');
+import express from 'express';
+import { authenticateUser } from '../middleware/auth.js';
+import { getSupabase } from '../config/database.js';
+
 const router = express.Router();
-const multer = require('multer');
-const { authenticateToken } = require('../middleware/auth');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const pool = require('../db');
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-// Configure multer storage for Cloudinary
-const profileStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'naattu_market_profiles',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif'],
-    transformation: [{ width: 500, height: 500, crop: 'limit' }]
-  }
-});
-
-const productStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'naattu_market_products',
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-    transformation: [{ width: 1200, height: 1200, crop: 'limit' }]
-  }
-});
-
-// Create multer upload instances
-const uploadProfileImage = multer({ storage: profileStorage });
-const uploadProductImage = multer({ storage: productStorage });
 
 /**
  * @route POST /api/uploads/profile-image
- * @desc Upload user profile image
+ * @desc Update user profile with image URL
  * @access Private
  */
-router.post('/profile-image', authenticateToken, uploadProfileImage.single('image'), async (req, res) => {
+router.post('/profile-image', authenticateUser, async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: 'No image file provided' });
+    const { imageUrl } = req.body;
+    
+    if (!imageUrl) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Image URL is required' 
+      });
     }
 
-    // Get the Cloudinary upload result
-    const result = {
-      secure_url: req.file.path,
-      public_id: req.file.filename
-    };
+    // Validate URL format
+    try {
+      new URL(imageUrl);
+    } catch (error) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid image URL format' 
+      });
+    }
+
+    const supabase = getSupabase();
     
     // Update the user's profile with the new image URL
-    await pool.query(
-      'UPDATE users SET avatar_url = $1 WHERE id = $2',
-      [result.secure_url, req.user.id]
-    );
+    const { error } = await supabase
+      .from('users')
+      .update({ avatar_url: imageUrl })
+      .eq('id', req.user.id);
+
+    if (error) {
+      console.error('Error updating user avatar:', error);
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Failed to update user profile' 
+      });
+    }
 
     res.json({ 
       success: true, 
-      data: result
+      data: { secure_url: imageUrl, public_id: null }
     });
   } catch (error) {
-    console.error('Profile image upload error:', error);
+    console.error('Profile image update error:', error);
     res.status(500).json({ 
       success: false, 
-      error: 'Server error while uploading image' 
+      error: 'Server error while updating image' 
     });
   }
 });
 
 /**
  * @route POST /api/uploads/product-image
- * @desc Upload product image
+ * @desc Add product image URL
  * @access Private
  */
-router.post('/product-image', authenticateToken, uploadProductImage.single('image'), async (req, res) => {
+router.post('/product-image', authenticateUser, async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, error: 'No image file provided' });
+    const { imageUrl, productId } = req.body;
+    
+    if (!imageUrl) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Image URL is required' 
+      });
     }
 
     // Ensure the user is a vendor
-    if (req.user.role !== 'supplier') {
+    if (!req.userProfile || req.userProfile.user_type !== 'supplier') {
       return res.status(403).json({ 
         success: false, 
         error: 'Only vendors can upload product images' 
       });
     }
 
-    // Get the Cloudinary upload result
-    const result = {
-      secure_url: req.file.path,
-      public_id: req.file.filename
-    };
+    // Validate URL format
+    try {
+      new URL(imageUrl);
+    } catch (error) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid image URL format' 
+      });
+    }
+
+    const supabase = getSupabase();
+
+    // If productId is provided, update the product's image
+    if (productId) {
+      const { error } = await supabase
+        .from('products')
+        .update({ image_url: imageUrl })
+        .eq('id', productId)
+        .eq('supplier_id', req.user.id);
+
+      if (error) {
+        console.error('Error updating product image:', error);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'Failed to update product image' 
+        });
+      }
+    }
 
     res.json({ 
       success: true, 
-      data: result
+      data: { secure_url: imageUrl, public_id: null }
     });
   } catch (error) {
-    console.error('Product image upload error:', error);
+    console.error('Product image update error:', error);
     res.status(500).json({ 
       success: false, 
-      error: 'Server error while uploading product image' 
+      error: 'Server error while updating product image' 
     });
   }
 });
 
 /**
- * @route DELETE /api/uploads/image/:public_id
- * @desc Delete an image from Cloudinary
+ * @route DELETE /api/uploads/image/:imageId
+ * @desc Remove image URL from database
  * @access Private
  */
-router.delete('/image/:public_id', authenticateToken, async (req, res) => {
+router.delete('/image/:imageId', authenticateUser, async (req, res) => {
   try {
-    const { public_id } = req.params;
+    const { imageId } = req.params;
+    const { type, entityId } = req.body; // type: 'profile' | 'product', entityId: user_id or product_id
     
-    // Delete the image from Cloudinary
-    const result = await cloudinary.uploader.destroy(public_id);
+    const supabase = getSupabase();
     
-    if (result.result !== 'ok') {
+    if (type === 'profile') {
+      // Remove profile image
+      const { error } = await supabase
+        .from('users')
+        .update({ avatar_url: null })
+        .eq('id', req.user.id);
+
+      if (error) {
+        console.error('Error removing profile image:', error);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'Failed to remove profile image' 
+        });
+      }
+    } else if (type === 'product' && entityId) {
+      // Remove product image
+      const { error } = await supabase
+        .from('products')
+        .update({ image_url: null })
+        .eq('id', entityId)
+        .eq('supplier_id', req.user.id);
+
+      if (error) {
+        console.error('Error removing product image:', error);
+        return res.status(500).json({ 
+          success: false, 
+          error: 'Failed to remove product image' 
+        });
+      }
+    } else {
       return res.status(400).json({ 
         success: false, 
-        error: 'Failed to delete image' 
+        error: 'Invalid image type or missing entity ID' 
       });
     }
 
     res.json({ 
       success: true, 
-      message: 'Image deleted successfully' 
+      message: 'Image removed successfully' 
     });
   } catch (error) {
-    console.error('Image deletion error:', error);
+    console.error('Image removal error:', error);
     res.status(500).json({ 
       success: false, 
-      error: 'Server error while deleting image' 
+      error: 'Server error while removing image' 
     });
   }
 });
 
-module.exports = router;
+export default router;

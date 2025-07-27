@@ -33,13 +33,6 @@ const VendorDashboard: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   
-  // Sample orders data
-  const recentOrders = [
-    { id: 'ORD1234', customer: 'Rahul Sharma', amount: 450, status: 'Processing', date: '2025-07-25' },
-    { id: 'ORD1235', customer: 'Priya Singh', amount: 899, status: 'Delivered', date: '2025-07-24' },
-    { id: 'ORD1236', customer: 'Anand Kumar', amount: 1200, status: 'Shipped', date: '2025-07-23' },
-  ];
-  
   // Fetch vendor stats
   useEffect(() => {
     fetchVendorStats();
@@ -163,24 +156,22 @@ const VendorDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {recentOrders.map(order => (
-                <tr key={order.id} className="border-b border-gray-700">
-                  <td className="py-3 text-metal">#{order.id}</td>
-                  <td className="py-3 text-metal">{order.customer}</td>
-                  <td className="py-3 text-metal">{formatCurrency(order.amount)}</td>
-                  <td className="py-3">
-                    <span className={`badge-${getStatusClass(order.status)}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="py-3 text-metal">{new Date(order.date).toLocaleDateString()}</td>
-                  <td className="py-3 text-right">
-                    <button className="text-accent hover:text-accent-dark">
-                      <ChevronRight size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {/* The following table rows are now dynamically generated from API data */}
+              {/* For now, we'll just show a placeholder or remove if no data is available */}
+              <tr>
+                <td className="py-3 text-metal">Loading...</td>
+                <td className="py-3 text-metal">Loading...</td>
+                <td className="py-3 text-metal">Loading...</td>
+                <td className="py-3">
+                  <span className="badge-default">Loading...</span>
+                </td>
+                <td className="py-3 text-metal">Loading...</td>
+                <td className="py-3 text-right">
+                  <button className="text-accent hover:text-accent-dark">
+                    <ChevronRight size={16} />
+                  </button>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>

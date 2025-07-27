@@ -1,19 +1,19 @@
 import express from 'express';
 import { getSupabase } from '../config/database.js';
-import { authMiddleware } from '../middleware/auth.js';
+import { authenticateUser } from '../middleware/auth.js';
 
 const router = express.Router();
-const supabase = getSupabase();
 
 /**
  * @route   GET /api/messages
  * @desc    Get messages for a conversation
  * @access  Private
  */
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authenticateUser, async (req, res) => {
   try {
     const { supplierId, orderId = 'general' } = req.query;
     const userId = req.user.id;
+    const supabase = getSupabase();
     
     if (!supplierId) {
       return res.status(400).json({
@@ -92,10 +92,11 @@ router.get('/', authMiddleware, async (req, res) => {
  * @desc    Send a new message
  * @access  Private
  */
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authenticateUser, async (req, res) => {
   try {
     const { supplierId, orderId, text } = req.body;
     const userId = req.user.id;
+    const supabase = getSupabase();
     
     if (!supplierId || !text) {
       return res.status(400).json({
@@ -156,10 +157,11 @@ router.post('/', authMiddleware, async (req, res) => {
  * @desc    Mark messages as read
  * @access  Private
  */
-router.put('/read', authMiddleware, async (req, res) => {
+router.put('/read', authenticateUser, async (req, res) => {
   try {
     const { supplierId } = req.body;
     const userId = req.user.id;
+    const supabase = getSupabase();
     
     if (!supplierId) {
       return res.status(400).json({

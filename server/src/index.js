@@ -15,6 +15,8 @@ import orderRoutes from './routes/orders.js';
 import userRoutes from './routes/users.js';
 import messageRoutes from './routes/messages.js';
 import vendorRoutes from './routes/vendors.js';
+import vendorsMapRoutes from './routes/vendors-map.js';
+import suppliersMapRoutes from './routes/suppliers-map.js';
 import uploadRoutes from './routes/uploads.js';
 
 // Import middleware
@@ -92,6 +94,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/vendors', vendorRoutes);
+app.use('/api/vendors', vendorsMapRoutes);
+app.use('/api/suppliers', suppliersMapRoutes);
 app.use('/api/uploads', uploadRoutes);
 
   // Socket.IO connection handling

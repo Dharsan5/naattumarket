@@ -1,18 +1,18 @@
 import express from 'express';
 import { getSupabase } from '../config/database.js';
-import { authMiddleware } from '../middleware/auth.js';
+import { authenticateUser } from '../middleware/auth.js';
 
 const router = express.Router();
-const supabase = getSupabase();
 
 /**
  * @route   GET /api/suppliers
  * @desc    Get all suppliers
  * @access  Private
  */
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authenticateUser, async (req, res) => {
   try {
     const userId = req.user.id;
+    const supabase = getSupabase();
 
     // Get all suppliers
     const { data: suppliers, error } = await supabase
@@ -108,7 +108,7 @@ router.get('/', authMiddleware, async (req, res) => {
  * @desc    Get a single supplier
  * @access  Private
  */
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', authenticateUser, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;

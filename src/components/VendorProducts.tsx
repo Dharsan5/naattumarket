@@ -11,7 +11,8 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { productService, Product, ProductFormData } from '../services/productService';
-import { CloudinaryService } from '../services/cloudinaryService';
+import { imageService } from '../services/cloudinaryService';
+import ImageUpload from './ImageUpload';
 import toast from 'react-hot-toast';
 
 const VendorProducts: React.FC = () => {
@@ -122,38 +123,27 @@ const VendorProducts: React.FC = () => {
     }
   };
 
-  // Handle image upload
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image size should be less than 5MB');
-      return;
-    }
-    
-    // Validate file type
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      toast.error('Only JPG, PNG and WebP images are supported');
-      return;
-    }
+  // Handle image URL input
+  const handleImageUrlInput = async (imageUrl: string) => {
+    if (!imageUrl.trim()) return;
     
     setUploadingImage(true);
     try {
-      const response = await CloudinaryService.uploadProductImage(file);
-      if (response.success && response.data) {
-        setProductForm({
-          ...productForm,
-          images: [...productForm.images, response.data.secure_url]
-        });
-        toast.success('Image uploaded successfully');
-      } else {
-        toast.error('Failed to upload image');
+      // Validate the image URL
+      const validation = await imageService.validateImageUrl(imageUrl);
+      if (!validation.valid) {
+        toast.error(validation.error || 'Invalid image URL');
+        return;
       }
+
+      setProductForm({
+        ...productForm,
+        images: [...productForm.images, imageUrl]
+      });
+      toast.success('Image added successfully');
     } catch (err) {
-      toast.error('Error uploading image');
-      console.error('Image upload error:', err);
+      toast.error('Error adding image');
+      console.error('Image add error:', err);
     } finally {
       setUploadingImage(false);
     }
@@ -485,23 +475,11 @@ const VendorProducts: React.FC = () => {
                   </div>
                 ))}
                 
-                <label className="border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center h-32 cursor-pointer hover:bg-gray-50">
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                    disabled={uploadingImage}
-                  />
-                  {uploadingImage ? (
-                    <Loader size={24} className="animate-spin" />
-                  ) : (
-                    <>
-                      <Plus size={24} className="mb-2 text-gray-400" />
-                      <span className="text-sm text-gray-500">Add Image</span>
-                    </>
-                  )}
-                </label>
+                <ImageUpload
+                  onImageUpload={handleImageUrlInput}
+                  placeholder="Enter product image URL"
+                  className="border-2 border-dashed border-gray-300 rounded-md p-4"
+                />
               </div>
               <p className="text-xs text-metal mt-2">Upload up to 4 images. First image will be the main product image.</p>
             </div>

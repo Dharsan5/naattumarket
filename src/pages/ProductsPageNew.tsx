@@ -47,15 +47,10 @@ const ProductsPage: React.FC = () => {
       if (response.success && response.data) {
         setProducts(response.data.products);
       } else {
-        // Fallback to mock data if API fails
-        setProducts(mockProducts);
-        if (response.error) {
-          toast.error(response.error);
-        }
+        setError('Failed to load products. Showing demo data.');
+        console.error('Product fetch error:', response.error);
       }
     } catch (err) {
-      // Fallback to mock data
-      setProducts(mockProducts);
       setError('Failed to load products. Showing demo data.');
       console.error('Product fetch error:', err);
     } finally {
@@ -99,106 +94,6 @@ const ProductsPage: React.FC = () => {
       page: 1
     }));
   };
-
-  // Mock products as fallback
-  const mockProducts: Product[] = [
-    {
-      id: "1",
-      name: "Organic Turmeric Powder",
-      price: 299,
-      original_price: 399,
-      image_url: "🌿",
-      rating: 4.8,
-      reviews_count: 156,
-      category: "Spices",
-      description: "Pure organic turmeric powder with high curcumin content",
-      in_stock: true,
-      supplier_name: "Green Valley Farms",
-      supplier_id: "sup1",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "2",
-      name: "Fresh Curry Leaves",
-      price: 89,
-      original_price: 120,
-      image_url: "🍃",
-      rating: 4.9,
-      reviews_count: 203,
-      category: "Herbs",
-      description: "Fresh curry leaves picked daily from organic gardens",
-      in_stock: true,
-      supplier_name: "Nature's Best",
-      supplier_id: "sup2",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "3",
-      name: "Traditional Coconut Oil",
-      price: 450,
-      original_price: 550,
-      image_url: "🥥",
-      rating: 4.7,
-      reviews_count: 89,
-      category: "Oil",
-      description: "Cold-pressed coconut oil from traditional methods",
-      in_stock: false,
-      supplier_name: "Coastal Farms",
-      supplier_id: "sup3",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "4",
-      name: "Red Chili Powder",
-      price: 199,
-      original_price: 250,
-      image_url: "🌶️",
-      rating: 4.6,
-      reviews_count: 124,
-      category: "Spices",
-      description: "Spicy red chili powder with authentic flavor",
-      in_stock: true,
-      supplier_name: "Spice Masters",
-      supplier_id: "sup4",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "5",
-      name: "Organic Basmati Rice",
-      price: 120,
-      original_price: 150,
-      image_url: "🍚",
-      rating: 4.5,
-      reviews_count: 78,
-      category: "Rice",
-      description: "Premium organic basmati rice with long grains",
-      in_stock: true,
-      supplier_name: "Rice Valley",
-      supplier_id: "sup5",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "6",
-      name: "Raw Honey",
-      price: 680,
-      original_price: 800,
-      image_url: "🍯",
-      rating: 4.8,
-      reviews_count: 167,
-      category: "Natural Products",
-      description: "Pure raw honey directly from beehives",
-      in_stock: true,
-      supplier_name: "Bee Farm Co.",
-      supplier_id: "sup6",
-      created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
-    }
-  ];
 
   const allCategories = ["All", ...productCategories];
 
