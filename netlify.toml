@@ -1,0 +1,36 @@
+[build]
+  # Build command for the frontend - skip TypeScript compilation for now
+  command = "npm install && npx vite build --mode production"
+  
+  # Directory to deploy (frontend build output)
+  publish = "dist"
+  
+  # Base directory for build (root of the project)
+  base = "."
+
+[build.environment]
+  # Set Node.js version
+  NODE_VERSION = "18"
+  
+  # Skip server directory during frontend build
+  NPM_FLAGS = "--production=false"
+
+# Redirect all requests to index.html for React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for better performance
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

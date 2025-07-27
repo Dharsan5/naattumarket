@@ -28,10 +28,10 @@ const ChatPage: React.FC = () => {
       try {
         setIsLoading(true);
         // Import is inside useEffect to avoid circular dependencies
-        const SupplierService = (await import('../services/supplierService')).default;
+        const SupplierService = await import('../services/supplierService');
         
         // Fetch suppliers from API service
-        const fetchedSuppliers = await SupplierService.fetchSuppliers();
+        const fetchedSuppliers = await SupplierService.SupplierService.getSuppliers();
         
         setSuppliers(fetchedSuppliers);
         setIsLoading(false);
