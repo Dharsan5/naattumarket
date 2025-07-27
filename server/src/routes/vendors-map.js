@@ -33,7 +33,7 @@ router.get('/', async (req, res) => {
     // Transform data to match frontend expectations
     const transformedVendors = vendors?.map(vendor => ({
       id: vendor.id,
-      name: vendor.full_name,
+      name: vendor.name,
       location: vendor.location,
       business_type: 'Street Food Vendor', // Default business type
       phone: vendor.phone,
@@ -95,7 +95,7 @@ router.get('/nearby', async (req, res) => {
     // Transform and filter vendors (simplified distance calculation)
     const transformedVendors = vendors?.map(vendor => ({
       id: vendor.id,
-      name: vendor.full_name,
+      name: vendor.name,
       location: vendor.location,
       business_type: 'Street Food Vendor',
       phone: vendor.phone,

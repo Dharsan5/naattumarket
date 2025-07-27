@@ -2,6 +2,57 @@ import express from 'express';
 import { getSupabase } from '../config/database.js';
 
 const router = express.Router();
+// GET /api/products/meta/categories - Get all categories (should be before /:id)
+router.get('/meta/categories', async (req, res) => {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('products')
+      .select('category')
+      .not('category', 'is', null);
+    if (error) {
+      throw error;
+    }
+    const categories = [...new Set(data.map(item => item.category))];
+    res.status(200).json({
+      status: 'success',
+      data: { categories }
+    });
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch categories',
+      error: error.message
+    });
+  }
+});
+
+// GET /api/products/categories - Alias for frontend compatibility
+router.get('/categories', async (req, res) => {
+  try {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from('products')
+      .select('category')
+      .not('category', 'is', null);
+    if (error) {
+      throw error;
+    }
+    const categories = [...new Set(data.map(item => item.category))];
+    res.status(200).json({
+      status: 'success',
+      data: { categories }
+    });
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch categories',
+      error: error.message
+    });
+  }
+});
 
 // GET /api/products - Get all products
 router.get('/', async (req, res) => {
