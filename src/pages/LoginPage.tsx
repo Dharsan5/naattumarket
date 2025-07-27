@@ -65,7 +65,7 @@ const LoginPage: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-6">
-            <Logo size="xl" variant="default" showText={true} />
+            <Logo size="lg" variant="default" />
           </div>
           <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
           <p className="text-secondary">Sign in to your NattuMarket account</p>

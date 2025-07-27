@@ -7,8 +7,8 @@ let socket: any = null;
 let isConnected = false;
 let userId: string | null = null;
 
-// API URL from environment - use fixed value for development to prevent issues
-const API_URL = 'http://localhost:5000';
+// API URL from environment - get from window location to work with proxy
+const API_URL = window.location.origin;
 
 // Event listeners
 const listeners: { [key: string]: Function[] } = {
@@ -23,22 +23,18 @@ const listeners: { [key: string]: Function[] } = {
 const SocketService = {
   // Initialize socket connection
   init: (token: string) => {
-    try {
-      if (socket) return;
-      
-      userId = token;
-      
-      socket = io(API_URL, {
-        auth: {
-          token
-        },
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionAttempts: 5
-      });
-    } catch (error) {
-      console.error('Error initializing socket:', error);
-    }
+    if (socket) return;
+    
+    userId = token;
+    
+    socket = io(API_URL, {
+      auth: {
+        token
+      },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5
+    });
     
     // Socket event handlers
     socket.on('connect', () => {

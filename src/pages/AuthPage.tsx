@@ -190,7 +190,7 @@ const AuthPage: React.FC = () => {
       <div className="auth-card metal-glass-card">
         <div className="auth-header">
           <div className="auth-logo">
-            <Logo size="xl" variant="default" showText={true} />
+            <Logo size="lg" variant="default" />
           </div>
           <p className="auth-subtitle">Natural products from trusted suppliers</p>
         </div>

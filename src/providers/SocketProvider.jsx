@@ -13,22 +13,18 @@ export const SocketProvider = ({ children }) => {
   
   // Connect socket when user is authenticated
   useEffect(() => {
-    try {
-      if (isAuthenticated && user?.id) {
-        console.log('Initializing socket connection for user:', user.id);
-        socketService.init(user.id);
-      } else {
-        // Disconnect socket when user logs out
-        socketService.disconnect();
-      }
-      
-      return () => {
-        // Clean up on unmount
-        socketService.disconnect();
-      };
-    } catch (error) {
-      console.error('Error in socket connection:', error);
+    if (isAuthenticated && user?.id) {
+      console.log('Initializing socket connection for user:', user.id);
+      socketService.init(user.id);
+    } else {
+      // Disconnect socket when user logs out
+      socketService.disconnect();
     }
+    
+    return () => {
+      // Clean up on unmount
+      socketService.disconnect();
+    };
   }, [isAuthenticated, user]);
   
   // Reconnect socket when coming back online
@@ -49,28 +45,24 @@ export const SocketProvider = ({ children }) => {
   
   // Join relevant rooms based on path
   useEffect(() => {
-    try {
-      const path = location.pathname;
-      
-      // Extract order ID from path if viewing an order
-      if (path.includes('/orders/') && isAuthenticated) {
-        const orderId = path.split('/orders/')[1].split('/')[0];
-        if (orderId) {
-          console.log('Joining order room:', orderId);
-          socketService.joinOrderRoom(orderId);
-        }
+    const path = location.pathname;
+    
+    // Extract order ID from path if viewing an order
+    if (path.includes('/orders/') && isAuthenticated) {
+      const orderId = path.split('/orders/')[1].split('/')[0];
+      if (orderId) {
+        console.log('Joining order room:', orderId);
+        socketService.joinOrderRoom(orderId);
       }
-      
-      // Extract supplier ID if viewing a supplier chat
-      if (path.includes('/suppliers/') && path.includes('/chat') && isAuthenticated) {
-        const supplierId = path.split('/suppliers/')[1].split('/')[0];
-        if (supplierId) {
-          console.log('Joining supplier chat:', supplierId);
-          socketService.joinSupplierChat(supplierId);
-        }
+    }
+    
+    // Extract supplier ID if viewing a supplier chat
+    if (path.includes('/suppliers/') && path.includes('/chat') && isAuthenticated) {
+      const supplierId = path.split('/suppliers/')[1].split('/')[0];
+      if (supplierId) {
+        console.log('Joining supplier chat:', supplierId);
+        socketService.joinSupplierChat(supplierId);
       }
-    } catch (error) {
-      console.error('Error joining rooms:', error);
     }
   }, [location.pathname, isAuthenticated]);
   

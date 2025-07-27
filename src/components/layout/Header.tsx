@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Logo size="sm" showText={true} />
+              <Logo size="sm" showText={false} />
             </motion.div>
           ) : (
             <motion.h1 

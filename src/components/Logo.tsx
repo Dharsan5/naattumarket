@@ -13,11 +13,11 @@ const Logo: React.FC<LogoProps> = ({
 }) => {
   const getSizeClass = () => {
     switch(size) {
-      case 'sm': return 'h-6 w-6';
-      case 'md': return 'h-8 w-8';
-      case 'lg': return 'h-10 w-10';
+      case 'sm': return 'h-8 w-8';
+      case 'md': return 'h-10 w-10';
+      case 'lg': return 'h-12 w-12';
       case 'xl': return 'h-16 w-16';
-      default: return 'h-8 w-8';
+      default: return 'h-10 w-10';
     }
   };
   
@@ -41,12 +41,12 @@ const Logo: React.FC<LogoProps> = ({
 
   return (
     <div className="flex items-center gap-2">
-      {/* Logo image */}
+      {/* Only show the image if not showing text, or both image and text */}
       <div className={`${getSizeClass()} flex items-center justify-center`}>
         <img 
           src="/assets/logos/logo2.png" 
           alt="NaattuMarket" 
-          className="w-full h-full object-contain"
+          className="w-full h-full"
         />
       </div>
       
