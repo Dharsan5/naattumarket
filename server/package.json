@@ -10,7 +10,6 @@
     "build": "node build.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
     "@types/leaflet": "^1.9.20",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

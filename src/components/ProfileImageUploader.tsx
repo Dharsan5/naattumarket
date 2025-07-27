@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Camera, Upload, Loader, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
 
 interface ProfileImageUploaderProps {
   currentImageUrl?: string | null;
@@ -12,7 +11,11 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
   currentImageUrl,
   onUploadSuccess 
 }) => {
-  const { updateProfileImage } = useAuth();
+  // Mock function since auth is removed
+  const updateProfileImage = async (file: File): Promise<string> => { 
+    console.log('Update profile image mock', file); 
+    return 'mock-url';
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,13 +57,13 @@ const ProfileImageUploader: React.FC<ProfileImageUploaderProps> = ({
       } else {
         toast.error('Failed to update profile image');
         // Revert to previous image on failure
-        setPreviewUrl(currentImageUrl);
+        setPreviewUrl(currentImageUrl || null);
       }
     } catch (error) {
       toast.error('Error uploading image');
       console.error('Image upload error:', error);
       // Revert to previous image on error
-      setPreviewUrl(currentImageUrl);
+      setPreviewUrl(currentImageUrl || null);
     } finally {
       setIsLoading(false);
     }

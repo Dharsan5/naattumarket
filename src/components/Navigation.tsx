@@ -15,11 +15,13 @@ import {
   Heart,
   MapPin
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
-  const { user, isAuthenticated, logout } = useAuth();
+  
+  // Mock user data since auth is removed
+  const user = { name: 'Demo User' };
+  const isAuthenticated = true;
   
   // Navigation items for the regular navbar
   const navItems = [
@@ -63,7 +65,8 @@ const Navigation: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const handleLogout = async () => {
-    await logout();
+    // Mock logout functionality
+    console.log('Logout clicked');
   };
 
   return (

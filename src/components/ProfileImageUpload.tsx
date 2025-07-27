@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Upload, User, Loader } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 interface ProfileImageUploadProps {
@@ -9,7 +8,13 @@ interface ProfileImageUploadProps {
 }
 
 const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ className = '', size = 100 }) => {
-  const { user, updateProfileImage } = useAuth();
+  // Mock user data since auth is removed
+  const user = { avatar_url: '', name: 'Demo User' };
+  const updateProfileImage = async (file: File): Promise<boolean> => { 
+    console.log('Update profile image mock', file); 
+    return true;
+  };
+  
   const [isUploading, setIsUploading] = useState(false);
   
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

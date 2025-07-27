@@ -28,11 +28,28 @@ import {
 import VendorTab from '../components/VendorTab';
 import VendorDashboard from '../components/VendorDashboard';
 import ProfileImageUploader from '../components/ProfileImageUploader';
-import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 const ProfilePage: React.FC = () => {
-  const { user } = useAuth();
+  // Mock user data since auth is removed
+  const user = {
+    id: '1',
+    name: 'Demo User',
+    email: 'demo@naattumarket.com',
+    phone: '+91 98765 43210',
+    role: 'customer' as const,
+    avatar_url: '',
+    address: {
+      street: '123 Demo Street',
+      city: 'Chennai',
+      state: 'Tamil Nadu',
+      postal_code: '600001',
+      country: 'India'
+    },
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileForm, setProfileForm] = useState({

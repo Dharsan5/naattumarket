@@ -1,14 +1,15 @@
 import React, { useContext, useEffect } from 'react';
-import { AuthContext } from '../contexts/AuthContext';
 import { socketService } from '../services/socketService';
 import { useLocation } from 'react-router-dom';
 
 /**
- * SocketProvider - A component that manages socket connections based on auth state
+ * SocketProvider - A component that manages socket connections
  * Should wrap around the main app to provide socket functionality
  */
 export const SocketProvider = ({ children }) => {
-  const { user, isAuthenticated } = useContext(AuthContext);
+  // Mock user data since auth is removed
+  const user = { id: 'demo-user-1' };
+  const isAuthenticated = true;
   const location = useLocation();
   
   // Connect socket when user is authenticated

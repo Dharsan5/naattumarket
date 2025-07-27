@@ -5,23 +5,13 @@ import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { getSupabase } from './config/database.js';
 
 // Import routes
-import authRoutes from './routes/auth.js';
-import productRoutes from './routes/products.js';
-import supplierRoutes from './routes/suppliers.js';
-import orderRoutes from './routes/orders.js';
-import userRoutes from './routes/users.js';
-import messageRoutes from './routes/messages.js';
-import vendorRoutes from './routes/vendors.js';
-import vendorsMapRoutes from './routes/vendors-map.js';
-import suppliersMapRoutes from './routes/suppliers-map.js';
-import uploadRoutes from './routes/uploads.js';
+import productRoutes from './routes/products-new.js';
+import supplierRoutes from './routes/suppliers-new.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
-import { connectDB } from './config/database.js';
 
 // Load environment variables
 dotenv.config();
@@ -38,9 +28,6 @@ const io = new Server(server, {
     allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"]
   }
 });
-
-// Connect to database
-connectDB();
 
 // Rate limiting
 const limiter = rateLimit({
@@ -87,16 +74,17 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/suppliers', supplierRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/vendors', vendorRoutes);
-app.use('/api/vendors', vendorsMapRoutes);
-app.use('/api/suppliers', suppliersMapRoutes);
-app.use('/api/uploads', uploadRoutes);
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
 
   // Socket.IO connection handling
 io.on('connection', (socket) => {

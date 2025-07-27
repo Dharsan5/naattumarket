@@ -7,11 +7,13 @@ import {
   Edit 
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
 import { VendorService, BusinessProfile } from '../services/vendorService';
 
 const VendorTab: React.FC = () => {
-  const { user, updateProfile } = useAuth();
+  // Mock user data since auth is removed
+  const user = { id: '1', name: 'Demo User', role: 'supplier' as 'customer' | 'supplier' };
+  const updateProfile = async (data?: any) => { console.log('Update profile mock', data); };
+  
   const [isEditingVendorInfo, setIsEditingVendorInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [vendorData, setVendorData] = useState<BusinessProfile>({
